@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Benefits Calculator | James City County</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <img class="logo" src="images/jcc-logo.jpg" alt="James City County logo">
+    <div>
+      <h1>Interactive Benefits Calculator</h1>
+      <div class="tagline">Discover the full value of your James City County Benefit Package</div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <section class="intro-grid">
+    <div class="intro-card">
+      <h2>Welcome</h2>
+      <p>This tool helps employees estimate pay and benefit costs before finalizing enrollment decisions. The tool also highlights the County’s investment in employee benefits.</p>
+      </div>
+    </div>
+    <div class="intro-card">
+      <h2>Before You Begin</h2>
+      <p>Have your annual salary or hourly rate available. This tool estimates gross pay and selected deductions only. It does not calculate taxes or final payroll amounts.</p>
+    </div>
+  </section>
+
+  <nav class="tabs" aria-label="Calculator sections">
+    <button type="button" class="tab active" data-panel="pay">1. Salary/Hourly Pay</button>
+    <button type="button" class="tab" data-panel="compare">2. Healthcare Plan Comparison</button>
+    <button type="button" class="tab" data-panel="elections">3. Healthcare Elections</button>
+    <button type="button" class="tab" data-panel="retirement">4. Retirement Elections</button>
+    <button type="button" class="tab" data-panel="impact">5. Paycheck Impact</button>
+    <button type="button" class="tab" data-panel="summary">6. Summary</button>
+    <button type="button" class="tab" data-panel="education">7. Benefits Education</button>
+  </nav>
+
+  <div class="mobile-nav">
+    <label for="mobileSection">Choose a section</label>
+    <select id="mobileSection"></select>
+  </div>
+
+  <section id="pay" class="panel active">
+    <div class="grid">
+      <div>
+        <div class="section-heading"><div class="section-icon" aria-hidden="true">💵</div><h2>Salary/Hourly Pay</h2></div>
+        <div class="card blue">
+          <h3>Pay Information</h3>
+          <div class="two">
+            <label><input type="radio" name="payMode" value="salary" checked style="width:auto"> Annual salary</label>
+            <label><input type="radio" name="payMode" value="hourly" style="width:auto"> Hourly rate</label>
+          </div>
+          <div id="salaryBox">
+            <label for="annualSalary">Annual Salary</label>
+            <input id="annualSalary" type="number" min="0" step="100" value="55000">
+          </div>
+          <div id="hourlyBox" class="hidden">
+            <div class="two">
+              <div><label for="hourlyRate">Hourly Rate</label><input id="hourlyRate" type="number" min="0" step=".01" value="26.44"></div>
+              <div><label for="hoursWeek">Hours Per Week</label><input id="hoursWeek" type="number" min="1" step=".25" value="40"></div>
+            </div>
+          </div>
+          <div class="three">
+            <div><label>Pay Periods Per Year</label><input value="24" readonly></div>
+            <div><label>Annual Hours</label><input id="annualHours" readonly></div>
+            <div><label>Gross Per Pay Period</label><input id="grossPerPayInput" readonly></div>
+          </div>
+        </div>
+
+
+        <div class="card red">
+          <h3>Future Increase Estimate</h3>
+          <p>Enter any percentage to preview how a future pay increase would affect the salary or hourly rate entered above.</p>
+          <label for="futureIncreasePct">Increase Percentage</label>
+          <input id="futureIncreasePct" type="number" min="0" step="0.01" value="0">
+          <div class="three">
+            <div><label>Future Annual Pay</label><input id="futureAnnualPay" readonly></div>
+            <div><label>Future Gross Per Pay Period</label><input id="futureGrossPerPay" readonly></div>
+            <div><label>Future Hourly Equivalent</label><input id="futureHourlyRate" readonly></div>
+          </div>
+          <div class="kpi"><span>Estimated annual increase</span><strong id="futureAnnualIncrease">$0.00</strong></div>
+          <div class="kpi"><span>Estimated increase per pay period</span><strong id="futurePerPayIncrease">$0.00</strong></div>
+        </div>
+
+        <div class="card green">
+          <h3>Personal Information</h3>
+          <p class="small">Information entered here is used only within this browser session to calculate age-based benefits.</p>
+          <div class="two">
+            <div><label for="dob">Date of Birth</label><input id="dob" type="date"></div>
+            <div><label for="tobacco">Tobacco Use</label><select id="tobacco"><option value="non">No</option><option value="tobacco">Yes</option></select></div>
+          </div>
+          <div class="two">
+            <div><label for="coverSpouse">Include spouse options?</label><select id="coverSpouse"><option value="no">No</option><option value="yes">Yes</option></select></div>
+            <div id="spouseDobWrap" class="hidden"><label for="spouseDob">Spouse Date of Birth</label><input id="spouseDob" type="date"></div>
+          </div>
+          <div class="kpi"><span>Calculated age as of July 1, 2026</span><strong id="employeeAge">—</strong></div>
+          <div class="kpi"><span>Calculated spouse age as of July 1, 2026</span><strong id="spouseAge">—</strong></div>
+        </div>
+      </div>
+      <aside>
+        <div class="card">
+          <h3>Estimated Gross Pay</h3>
+          <div class="result" id="grossPerPay">$0.00</div>
+          <div class="kpi"><span>Annual gross pay</span><strong id="annualGross">$0.00</strong></div>
+          <div class="kpi"><span>Monthly gross pay</span><strong id="monthlyGross">$0.00</strong></div>
+          <div class="kpi"><span>Hourly equivalent</span><strong id="hourlyEquivalent">$0.00</strong></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="compare" class="panel">
+    <div class="section-heading"><div class="section-icon" aria-hidden="true">⚖️</div><h2>Healthcare Plan Comparison</h2></div>
+    <p>Review factual differences between the HSA Plan (CDHP) and Traditional Plan. This section does not recommend one plan over another.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Plan Feature</th><th>HSA Plan (CDHP)</th><th>Traditional Plan</th></tr></thead>
+        <tbody>
+          <tr><td>Employee monthly premium</td><td>Lower</td><td>Higher</td></tr>
+          <tr><td>Deductible</td><td>Higher</td><td>Lower</td></tr>
+          <tr><td>Out-of-pocket maximum</td><td>Higher</td><td>Lower</td></tr>
+          <tr><td>Prescription costs count toward deductible</td><td>Yes</td><td>No</td></tr>
+          <tr><td>Preventive care covered at 100%</td><td>Yes</td><td>Yes</td></tr>
+          <tr><td>Health Savings Account available</td><td>Yes, if eligible</td><td>No</td></tr>
+          <tr><td>Compatible Health Care FSA</td><td>No; Limited Purpose FSA may be available</td><td>Yes</td></tr>
+          <tr><td>Unused healthcare account funds</td><td>HSA funds remain with the employee</td><td>FSA rollover is limited by plan rules</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">Employees may compare premiums, deductibles, out-of-pocket limits, expected healthcare use, prescription costs, and account eligibility when reviewing the plans.</div>
+  </section>
+
+  <section id="elections" class="panel">
+    <div class="section-heading"><div class="section-icon" aria-hidden="true">🩺</div><h2>Healthcare Elections</h2></div>
+    <div class="card blue">
+      <h3>Build Your Benefit Package <span class="badge">Personalized view</span></h3>
+      <p>Select the benefits you'd like to review. The calculator will display only the elections you choose, making it easier to compare your options.</p>
+      <div class="checklist">
+        <label class="checkitem"><input class="benefit-toggle" type="checkbox" value="medical" checked> Healthcare (Medical)</label>
+        <label class="checkitem"><input class="benefit-toggle" type="checkbox" value="dental" checked> Dental</label>
+        <label class="checkitem"><input class="benefit-toggle" type="checkbox" value="vision" checked> Voluntary Vision</label>
+        <label class="checkitem"><input class="benefit-toggle" type="checkbox" value="accounts"> HSA / Flexible Spending Accounts</label>
+        <label class="checkitem"><input class="benefit-toggle" type="checkbox" value="critical"> Critical Illness</label>
+        <label class="checkitem"><input class="benefit-toggle" type="checkbox" value="disability"> Disability Insurance</label>
+        <label class="checkitem"><input class="benefit-toggle" type="checkbox" value="life"> Optional Life Insurance</label>
+      </div>
+    </div>
+
+    <div id="section-medical" class="benefit-section visible card blue">
+      <h3>Healthcare (Medical)</h3>
+      <div class="two">
+        <div><label for="medicalPlan">Medical Plan</label><select id="medicalPlan"><option value="none">No Coverage</option><option value="hsa" selected>HSA Plan (CDHP)</option><option value="traditional">Traditional Plan</option></select></div>
+        <div><label for="medicalCoverage">Coverage Level</label><select id="medicalCoverage"><option value="none">No Coverage</option><option value="employee" selected>Employee Only</option><option value="dual">Dual</option><option value="family">Family</option></select></div>
+      </div>
+      <div class="kpi"><span>Employee premium per pay period</span><strong id="medPerPay">$0.00</strong></div>
+      <div class="kpi"><span>County contribution per pay period</span><strong id="medCountyPerPay">$0.00</strong></div>
+    </div>
+
+    <div id="section-dental" class="benefit-section visible card green">
+      <h3>Dental</h3>
+      <div class="two">
+        <div><label for="dentalPlan">Dental Plan</label><select id="dentalPlan"><option value="none">No Coverage</option><option value="epo">EPO Plan</option><option value="ppo1" selected>PPO Plus Plan 1</option><option value="ppo2">PPO Plus Plan 2</option></select></div>
+        <div><label for="dentalCoverage">Coverage Level</label><select id="dentalCoverage"><option value="none">No Coverage</option><option value="employee" selected>Employee Only</option><option value="dual">Dual</option><option value="family">Family</option></select></div>
+      </div>
+      <div class="kpi"><span>Employee premium per pay period</span><strong id="dentPerPay">$0.00</strong></div>
+      <div class="kpi"><span>County contribution per pay period</span><strong id="dentCountyPerPay">$0.00</strong></div>
+    </div>
+
+    <div id="section-vision" class="benefit-section visible card red">
+      <h3>Voluntary Vision</h3>
+      <label for="visionCoverage">Coverage Level</label>
+      <select id="visionCoverage"><option value="none">No Coverage</option><option value="employee" selected>Employee Only</option><option value="dual">Dual</option><option value="family">Family</option></select>
+      <div class="kpi"><span>Employee premium per pay period</span><strong id="visionPerPay">$0.00</strong></div>
+    </div>
+
+    <div id="section-accounts" class="benefit-section card blue">
+      <h3>Health Savings and Flexible Spending Accounts</h3>
+      <p>The available entry fields below change automatically based on the medical plan selected.</p>
+
+      <div id="accountPlanMessage" class="callout"></div>
+
+      <div id="hsaAccountCard" class="card green hidden">
+        <h3>HSA Plan Accounts</h3>
+        <div class="two">
+          <div>
+            <label for="hsaEmployeePerPay">Employee HSA Contribution Per Pay Period</label>
+            <input id="hsaEmployeePerPay" type="number" min="0" step="1" value="0">
+            <div class="small">The County contributes $43.34 per pay period and matches 50% of your contribution, up to $30 per pay period.</div>
+          </div>
+          <div>
+            <label for="limitedFsaAnnual">Limited Purpose FSA Annual Election</label>
+            <input id="limitedFsaAnnual" type="number" min="0" max="3400" step="50" value="0">
+            <div class="small">Maximum $3,400. May only be used for eligible dental and vision expenses.</div>
+          </div>
+        </div>
+        <div class="kpi"><span>County base HSA funding per pay period</span><strong id="hsaBasePerPay">$0.00</strong></div>
+        <div class="kpi"><span>Estimated County HSA match per pay period</span><strong id="hsaMatchPerPay">$0.00</strong></div>
+        <div class="kpi"><span>Estimated annual total contributed to HSA</span><strong id="hsaAnnualTotal">$0.00</strong></div>
+        <div id="hsaLimitNotice" class="callout warning hidden"></div>
+      </div>
+
+      <div id="traditionalFsaCard" class="card green hidden">
+        <h3>Traditional Plan Account</h3>
+        <label for="healthFsaAnnual">Health Care FSA Annual Election</label>
+        <input id="healthFsaAnnual" type="number" min="0" max="3400" step="50" value="0">
+        <div class="small">Maximum $3,400. May be used for eligible medical, dental, and vision expenses.</div>
+      </div>
+
+      <div class="card">
+        <h3>Dependent Care FSA</h3>
+        <label for="dependentFsaAnnual">Dependent Care FSA Annual Election</label>
+        <input id="dependentFsaAnnual" type="number" min="0" max="7500" step="50" value="0">
+        <div class="small">Maximum $7,500; $3,750 if married filing separately. This account is not tied to the medical plan selected.</div>
+      </div>
+    </div>
+
+    <div id="section-critical" class="benefit-section card red">
+      <h3>Voluntary Critical Illness</h3>
+      <div class="two">
+        <div><label for="ciEmployeeCoverage">Employee Coverage</label><select id="ciEmployeeCoverage"><option value="0">No Coverage</option><option value="10000">$10,000</option><option value="20000">$20,000</option></select></div>
+        <div id="ciSpouseWrap" class="hidden"><label for="ciSpouseCoverage">Spouse Coverage</label><select id="ciSpouseCoverage"><option value="0">No Coverage</option><option value="10000">$10,000</option><option value="20000">$20,000</option></select></div>
+      </div>
+      <div class="kpi"><span>Employee premium per pay period</span><strong id="ciEmployeePerPay">$0.00</strong></div>
+      <div class="kpi"><span>Spouse premium per pay period</span><strong id="ciSpousePerPay">$0.00</strong></div>
+      <div class="small">Dependent children are automatically covered at 50% of the employee's elected amount, up to age 26, at no additional cost.</div>
+    </div>
+
+    <div id="section-disability" class="benefit-section card green">
+      <h3>Voluntary Disability Insurance</h3>
+      <div class="two">
+        <div><label for="stdEnroll">Short-Term Disability</label><select id="stdEnroll"><option value="no">Do Not Enroll</option><option value="yes">Enroll</option></select></div>
+        <div><label for="ltdEnroll">Long-Term Disability</label><select id="ltdEnroll"><option value="no">Do Not Enroll</option><option value="yes">Enroll</option></select></div>
+      </div>
+      <div id="disabilityEligibility" class="callout"></div>
+      <div class="two">
+        <div class="card"><h3>Short-Term Disability</h3><div class="kpi"><span>Monthly premium</span><strong id="stdMonthly">$0.00</strong></div><div class="kpi"><span>Per pay period</span><strong id="stdPerPay">$0.00</strong></div></div>
+        <div class="card"><h3>Long-Term Disability</h3><div class="kpi"><span>Monthly premium</span><strong id="ltdMonthly">$0.00</strong></div><div class="kpi"><span>Per pay period</span><strong id="ltdPerPay">$0.00</strong></div></div>
+      </div>
+    </div>
+
+    <div id="section-life" class="benefit-section card blue">
+      <h3>Optional Group Life Insurance</h3>
+      <div class="two">
+        <div><label for="lifeOption">Coverage Option</label><select id="lifeOption"><option value="0">No Coverage</option><option value="1">Option 1</option><option value="2">Option 2</option><option value="3">Option 3</option><option value="4">Option 4</option><option value="5">Option 5</option><option value="6">Option 6</option><option value="7">Option 7</option><option value="8">Option 8</option></select></div>
+        <div><label for="includeSpouseLife">Include Spouse Coverage</label><select id="includeSpouseLife"><option value="no">No</option><option value="yes">Yes</option></select></div>
+      </div>
+      <label for="includeChildLife">Include Dependent Child Coverage</label>
+      <select id="includeChildLife"><option value="no">No</option><option value="yes">Yes</option></select>
+      <div class="three">
+        <div class="card"><h3>Employee</h3><div class="kpi"><span>Coverage</span><strong id="lifeEmployeeCoverage">$0</strong></div><div class="kpi"><span>Per pay period</span><strong id="lifeEmployeePerPay">$0.00</strong></div></div>
+        <div class="card"><h3>Spouse</h3><div class="kpi"><span>Coverage</span><strong id="lifeSpouseCoverage">$0</strong></div><div class="kpi"><span>Per pay period</span><strong id="lifeSpousePerPay">$0.00</strong></div></div>
+        <div class="card"><h3>Child(ren)</h3><div class="kpi"><span>Coverage</span><strong id="lifeChildCoverage">$0</strong></div><div class="kpi"><span>Per pay period</span><strong id="lifeChildPerPay">$0.00</strong></div></div>
+      </div>
+      <div id="lifeEoiNotice" class="callout"></div>
+    </div>
+
+    <div class="card">
+      <h3>Selected Benefit Cost Per Pay Period</h3>
+      <div class="four">
+        <div class="card"><span>Medical</span><div id="boxMedical" class="result">$0.00</div></div>
+        <div class="card"><span>Dental</span><div id="boxDental" class="result">$0.00</div></div>
+        <div class="card"><span>Voluntary Vision</span><div id="boxVision" class="result">$0.00</div></div>
+        <div class="card"><span>HSA/FSA</span><div id="boxAccounts" class="result">$0.00</div></div>
+        <div class="card"><span>Critical Illness</span><div id="boxCritical" class="result">$0.00</div></div>
+        <div class="card"><span>Disability</span><div id="boxDisability" class="result">$0.00</div></div>
+        <div class="card"><span>Optional Life</span><div id="boxLife" class="result">$0.00</div></div>
+        <div class="card green"><span>Total</span><div id="boxTotal" class="result">$0.00</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Need a Complete List of Benefit Rates?</h3>
+      <p>For detailed monthly premiums and voluntary vision rates, view the list of monthly premiums.</p>
+      <a class="link-button" target="_blank" rel="noopener" href="https://www.jamescitycountyva.gov/DocumentCenter/View/33685/Monthly-Premiums-PDF?bidId=">View Monthly Premiums</a>
+      <p>For complete benefit and plan information, view the official James City County Benefits Guide.</p>
+      <a class="link-button secondary" target="_blank" rel="noopener" href="https://www.jamescitycountyva.gov/DocumentCenter/View/33850/Benefits-Information-Guide-Full-Time-PDF?bidId=">Official James City County Benefits Guide</a>
+    </div>
+  </section>
+
+  <section id="retirement" class="panel">
+    <div class="section-heading"><div class="section-icon" aria-hidden="true">🏦</div><h2>Retirement Elections</h2></div>
+    <div class="grid">
+      <div>
+        <div class="card blue">
+          <label for="retirementPlan">VRS Retirement Plan</label>
+          <select id="retirementPlan"><option value="plan1">Plan 1</option><option value="plan2">Plan 2</option><option value="hybrid" selected>Hybrid</option></select>
+          <div id="retirementDesign" class="callout"></div>
+        </div>
+        <div id="hybridVoluntaryCard" class="card green">
+          <h3>Defined Contribution Plan & County Match</h3>
+          <p>Hybrid Plan members may voluntarily contribute between 0% and 4% of eligible compensation. The County match to the 401(a) account is based on the elected percentage.</p>
+          <label for="dcPercent">Employee Voluntary Contribution</label>
+          <select id="dcPercent"><option value="0">0.00%</option><option value=".5">0.50%</option><option value="1">1.00%</option><option value="1.5">1.50%</option><option value="2">2.00%</option><option value="2.5">2.50%</option><option value="3">3.00%</option><option value="3.5">3.50%</option><option value="4">4.00%</option></select>
+          <details>
+            <summary>View County matching percentages</summary>
+            <div class="details-body">
+              <div class="table-scroll">
+                <table>
+                  <thead><tr><th>Employee Voluntary Contribution</th><th>County 401(a) Match</th></tr></thead>
+                  <tbody>
+                    <tr><td>0.00%</td><td>0.00%</td></tr>
+                    <tr><td>0.50%</td><td>0.50%</td></tr>
+                    <tr><td>1.00%</td><td>1.00%</td></tr>
+                    <tr><td>1.50%</td><td>1.25%</td></tr>
+                    <tr><td>2.00%</td><td>1.50%</td></tr>
+                    <tr><td>2.50%</td><td>1.75%</td></tr>
+                    <tr><td>3.00%</td><td>2.00%</td></tr>
+                    <tr><td>3.50%</td><td>2.25%</td></tr>
+                    <tr><td>4.00%</td><td>2.50%</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </details>
+
+        </div>
+      </div>
+      <aside>
+        <div class="card">
+          <h3>Estimated Retirement Deductions</h3>
+          <div class="kpi"><span>Mandatory employee contribution per pay</span><strong id="retMandatoryPerPay">$0.00</strong></div>
+          <div class="kpi"><span>Voluntary employee contribution per pay</span><strong id="retVoluntaryPerPay">$0.00</strong></div>
+          <div class="kpi"><span>County 401(a) match per pay</span><strong id="retMatchPerPay">$0.00</strong></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="impact" class="panel">
+    <div class="section-heading"><div class="section-icon" aria-hidden="true">🧾</div><h2>Paycheck Impact</h2></div>
+    <div class="grid">
+      <div class="card green">
+        <h3>Estimated Pay Before Taxes <span class="badge">Planning estimate</span></h3>
+        <div class="kpi"><span>Gross pay per pay period</span><strong id="impactGross">$0.00</strong></div>
+        <div class="kpi"><span>Healthcare elections</span><strong id="impactBenefits">$0.00</strong></div>
+        <div class="kpi"><span>Retirement deductions</span><strong id="impactRetirement">$0.00</strong></div>
+        <div class="kpi"><span>Total selected deductions</span><strong id="impactTotalDeductions">$0.00</strong></div>
+        <div class="kpi"><span>Estimated pay before taxes</span><strong id="impactAfter">$0.00</strong></div>
+      </div>
+      <aside>
+        <div class="card blue">
+          <h3>County Contributions <span class="badge">Employer-paid value</span></h3>
+          <div class="kpi"><span>Medical contribution per pay</span><strong id="countyMedical">$0.00</strong></div>
+          <div class="kpi"><span>Dental contribution per pay</span><strong id="countyDental">$0.00</strong></div>
+          <div class="kpi"><span>HSA base funding per pay</span><strong id="countyHsaBase">$0.00</strong></div>
+          <div class="kpi"><span>HSA match per pay</span><strong id="countyHsaMatch">$0.00</strong></div>
+          <div class="kpi"><span>401(a) match per pay</span><strong id="countyRetMatch">$0.00</strong></div>
+          <div class="kpi"><span>Total estimated County contribution per pay</span><strong id="countyTotal">$0.00</strong></div>
+        </div>
+        <div class="callout warning">This is not a net pay calculator. Taxes, FICA, and optional deductions are not included in this tool. Garnishments, and other payroll items are also excluded.</div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="summary" class="panel">
+    <div class="section-heading"><div class="section-icon" aria-hidden="true">📋</div><h2>Summary</h2></div>
+    <div class="card green">
+      <div class="kpi"><span>Annual gross pay</span><strong id="sumAnnual">$0.00</strong></div>
+      <div class="kpi"><span>Future increase percentage</span><strong id="sumFuturePct">0.00%</strong></div>
+      <div class="kpi"><span>Future annual gross pay</span><strong id="sumFutureAnnual">$0.00</strong></div>
+      <div class="kpi"><span>Gross pay per pay period</span><strong id="sumGross">$0.00</strong></div>
+      <div class="kpi"><span>Healthcare deductions per pay</span><strong id="sumBenefits">$0.00</strong></div>
+      <div class="kpi"><span>Retirement deductions per pay</span><strong id="sumRetirement">$0.00</strong></div>
+      <div class="kpi"><span>Estimated pay before taxes</span><strong id="sumAfter">$0.00</strong></div>
+      <div class="kpi"><span>County contributions per pay</span><strong id="sumCounty">$0.00</strong></div>
+      <div class="kpi"><span>Estimated annual County contributions</span><strong id="sumCountyAnnual">$0.00</strong></div>
+    </div>
+    <div class="callout">This calculator is an informational planning tool and does not provide financial, tax, legal, medical, or enrollment advice.</div>
+    <div class="actions">
+      <button class="action" type="button" onclick="window.print()">Print / Save as PDF</button>
+      <button class="action" id="downloadPdf" type="button">Download PDF Summary</button>
+      <button class="action secondary" id="resetForm" type="button">Reset Example Values</button>
+    </div>
+  </section>
+
+  <section id="education" class="panel">
+    <div class="section-heading"><div class="section-icon" aria-hidden="true">📘</div><h2>Benefits Education</h2></div>
+    <details open><summary>Understanding the HSA Plan and Traditional Plan</summary><div class="details-body"><p>The HSA Plan generally has lower employee premiums and higher deductible exposure. The Traditional Plan generally has higher employee premiums and lower deductible exposure. Both plans include preventive care and routine vision benefits. Voluntary Vision provides additional vision benefits such as frame, lens, and contact allowances.</p></div></details>
+    <details><summary>What is an HSA?</summary><div class="details-body"><p>An HSA is a tax-advantaged account available to eligible employees enrolled in the HSA Plan. Contributions may be made through payroll or during the year, funds roll over, the account belongs to the employee, and eligible funds may be invested. Qualified expenses include medical, dental, vision, prescription, deductible, copayment, and coinsurance expenses.</p><p>2026 limits: $4,400 for employee-only coverage and $8,750 for family coverage, plus a $1,000 catch-up contribution for eligible individuals age 55 or older. Limits include employee and employer contributions.</p></div></details>
+    <details><summary>Flexible Spending Accounts</summary><div class="details-body"><p>Health Care and Limited Purpose FSAs have a $3,400 annual limit for the plan year beginning July 1, 2026. Up to $680 may roll over. The Dependent Care FSA limit is $7,500, or $3,750 if married filing separately, and has no rollover.</p><p>Employees enrolled in the HSA Plan cannot enroll in a full Health Care FSA. A Limited Purpose FSA can only be used for eligible dental and vision expenses. FSA elections are generally made during new-hire enrollment, open enrollment, or after a qualifying event, and must be re-elected each year.</p></div></details>
+    <details><summary>Voluntary Disability Insurance</summary><div class="details-body"><p>Short-Term Disability may replace 60% of weekly pre-disability earnings, subject to plan limits and waiting periods. Long-Term Disability is intended for qualifying disabilities lasting beyond the LTD waiting period. Eligibility depends on VRS plan and service time.</p></div></details>
+    <details><summary>Voluntary Critical Illness</summary><div class="details-body"><p>Critical Illness coverage pays a lump-sum benefit upon diagnosis of a covered condition. Employee and spouse coverage are available at $10,000 or $20,000. Spouse coverage cannot exceed employee coverage. Dependent children are automatically covered at 50% of the employee election at no additional cost.</p></div></details>
+    <details><summary>Optional Group Life Insurance</summary><div class="details-body"><p>Employees may elect one to eight times creditable compensation, subject to plan maximums. Spouse and child coverage must follow the same option row. Some elections may require Evidence of Insurability. Basic group life is County-provided and is separate from optional life.</p></div></details>
+    <details><summary>Educational Information</summary><div class="details-body"><p>The calculator presents factual information to help employees understand available options. It does not recommend a plan, contribution amount, or benefit election. Employees should review official plan documents and consult personal advisors as appropriate.</p></div></details>
+  </section>
+</main>
+
+<button class="backtop" type="button" id="backTop">Back to top ↑</button>
+
+<footer>
+  <div class="footer-inner">
+    <strong>James City County, Virginia</strong>
+    <span><em>We work in partnership with all citizens to achieve a quality community.</em></span>
+  </div>
+</footer>
+
+<script src="js/calculator.js" defer></script>
+
+</body>
+</html>
