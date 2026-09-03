@@ -4,7 +4,7 @@ const planYearDate=new Date("2026-07-01T00:00:00");
 const rates={
   medical:{
     none:{emp:{none:0,employee:0,dual:0,family:0},county:{none:0,employee:0,dual:0,family:0}},
-    hsa:{emp:{none:0,employee:51,dual:145,family:190},county:{none:0,employee:842,dual:1491,family:2019}},
+    hsa:{emp:{none:0,employee:51,dual:145,family:190},county:{none:0,employee:695,dual:1344,family:1872}},
     traditional:{emp:{none:0,employee:140,dual:347,family:552},county:{none:0,employee:842,dual:1514,family:2057}}
   },
   dental:{
