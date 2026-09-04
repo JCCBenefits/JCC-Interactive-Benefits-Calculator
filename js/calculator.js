@@ -134,13 +134,33 @@ function benefitCosts(pay,age,spouseAge){
 function retirementCosts(pay){
   const plan=val("retirementPlan");
   const mandatory=pay.gross*.05;
-  let voluntary=0,match=0;
+
+  let voluntary=0;
+  let mandatoryCountyMatch=0;
+  let voluntaryCountyMatch=0;
+
   if(plan==="hybrid"){
     const pct=num("dcPercent");
+
     voluntary=pay.gross*pct/100;
-    match=pay.gross*(rates.dcMatch[pct]||0)/100;
+
+    // County mandatory match to the Hybrid 401(a)
+    mandatoryCountyMatch=pay.gross*.01;
+
+    // Additional County match based on the employee's voluntary 457(b) election
+    voluntaryCountyMatch=pay.gross*(rates.dcMatch[pct]||0)/100;
   }
-  return {mandatory,voluntary,match,total:mandatory+voluntary};
+
+  const match=mandatoryCountyMatch+voluntaryCountyMatch;
+
+  return {
+    mandatory,
+    voluntary,
+    mandatoryCountyMatch,
+    voluntaryCountyMatch,
+    match,
+    total:mandatory+voluntary
+  };
 }
 function calculate(){
   const mode=document.querySelector('input[name="payMode"]:checked')?.value||"salary";
@@ -232,9 +252,36 @@ function calculate(){
   text("boxMedical",money(c.med));text("boxDental",money(c.dent));text("boxVision",money(c.vision));text("boxAccounts",money(accounts));text("boxCritical",money(critical));text("boxDisability",money(disability));text("boxLife",money(life));text("boxTotal",money(c.total));
 
   const design=el("retirementDesign");
-  if(plan==="plan1")design.innerHTML="<strong>Plan 1:</strong> Defined Benefit plan. Membership generally began before July 1, 2010, with vesting as of January 1, 2013. Employees contribute a mandatory 5% of base gross income.";
-  if(plan==="plan2")design.innerHTML="<strong>Plan 2:</strong> Defined Benefit plan. Membership generally began July 1, 2010 through December 31, 2013, or earlier without vesting by January 1, 2013. Employees contribute a mandatory 5% of base gross income.";
-  if(plan==="hybrid")design.innerHTML="<strong>Hybrid:</strong> Includes Defined Benefit and Defined Contribution components. Employees contribute 4% to the Defined Benefit component and 1% to the mandatory Defined Contribution component, for a total mandatory employee contribution of 5%.";
+ if(plan==="plan1"){
+  design.innerHTML=`
+    <strong>VRS Plan 1</strong> is a Defined Benefit plan.
+    You are covered under Plan 1 if your membership date is prior to July 1, 2010,
+    and you were vested before January 1, 2013.
+    Employees contribute a mandatory 5% of base gross income to the plan.
+  `;
+}
+
+if(plan==="plan2"){
+  design.innerHTML=`
+    <strong>VRS Plan 2</strong> is a Defined Benefit plan.
+    You are covered under Plan 2 if:
+    <ul>
+      <li>Your membership date is from July 1, 2010, to December 31, 2013.</li>
+      <li>You have a membership date prior to July 1, 2010, but you were not vested before January 1, 2013.</li>
+      <li>You are a Public Safety employee hired after July 1, 2010.</li>
+    </ul>
+    Employees contribute a mandatory 5% of base gross income to the plan.
+  `;
+}
+
+if(plan==="hybrid"){
+  design.innerHTML=`
+    The <strong>Hybrid retirement plan</strong> is a Defined Benefit and a Defined Contribution plan.
+    You are on the Hybrid plan if your membership is after January 1, 2014.
+    Employees contribute 4% to the Defined Benefit component and 1% to the Defined Contribution component,
+    for a total mandatory employee contribution of 5%.
+  `;
+}
   el("hybridVoluntaryCard").classList.toggle("hidden",plan!=="hybrid");
   text("retMandatoryPerPay",money(r.mandatory));text("retVoluntaryPerPay",money(r.voluntary));text("retMatchPerPay",money(r.match));
 
@@ -250,7 +297,7 @@ function reset(){
   value("hsaEmployeePerPay",0);value("healthFsaAnnual",0);value("limitedFsaAnnual",0);value("dependentFsaAnnual",0);value("ciEmployeeCoverage","0");value("ciSpouseCoverage","0");
   value("stdEnroll","no");value("ltdEnroll","no");value("lifeOption","0");value("includeSpouseLife","no");value("includeChildLife","no");value("retirementPlan","hybrid");value("dcPercent","0");
   document.querySelectorAll(".benefit-toggle").forEach(x=>x.checked=["medical","dental","vision"].includes(x.value));
-  calculate();showPanel("pay");
+  calculate();showPanel("welcome");
 }
 function pdf(){
   calculate();

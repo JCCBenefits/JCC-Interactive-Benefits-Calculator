@@ -328,3 +328,59 @@ button.secondary,.link-button.secondary{
     height:38px;
   }
 }
+/* Welcome Page */
+.welcome-hero {
+  padding: 1rem 0;
+}
+
+.welcome-lead {
+  font-size: 1.08rem;
+  line-height: 1.7;
+  margin: 0 0 1.25rem;
+}
+
+.welcome-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.welcome-grid .card {
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.welcome-grid .card h3 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+.welcome-steps {
+  margin: 0.5rem 0 0;
+  padding-left: 1.4rem;
+}
+
+.welcome-steps li {
+  margin-bottom: 0.65rem;
+  line-height: 1.5;
+}
+
+.welcome-disclaimer {
+  grid-column: 1 / -1;
+}
+
+.welcome-disclaimer p {
+  margin-bottom: 0;
+  line-height: 1.6;
+}
+
+@media (max-width: 800px) {
+  .welcome-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .welcome-disclaimer {
+    grid-column: auto;
+  }
+}

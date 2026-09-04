@@ -20,34 +20,70 @@
 </header>
 
 <main class="container">
-  <section class="intro-grid">
-    <div class="intro-card">
+  <nav class="tabs" aria-label="Calculator sections">
+  <button type="button" class="tab active" data-panel="welcome">1. Welcome</button>
+  <button type="button" class="tab" data-panel="pay">2. Salary/Hourly Pay</button>
+  <button type="button" class="tab" data-panel="compare">3. Healthcare Plan Comparison</button>
+  <button type="button" class="tab" data-panel="elections">4. Healthcare Elections</button>
+  <button type="button" class="tab" data-panel="retirement">5. Retirement Elections</button>
+  <button type="button" class="tab" data-panel="impact">6. Paycheck Impact</button>
+  <button type="button" class="tab" data-panel="summary">7. Summary</button>
+  <button type="button" class="tab" data-panel="education">8. Benefits Education</button>
+</nav>
+
+<div class="mobile-nav">
+  <label for="mobileSection">Choose a section</label>
+  <select id="mobileSection"></select>
+</div>
+
+<section id="welcome" class="panel active">
+  <div class="welcome-hero">
+    <div class="section-heading">
+      <div class="section-icon" aria-hidden="true">👋</div>
       <h2>Welcome</h2>
-      <p>This tool helps employees estimate pay and benefit costs before finalizing enrollment decisions. The tool also highlights the County’s investment in employee benefits.</p>
+    </div>
+
+    <p class="welcome-lead">
+      This tool helps employees estimate pay and benefit costs before finalizing enrollment decisions.
+      The tool also highlights the County’s investment in employee benefits.
+    </p>
+
+    <div class="welcome-grid">
+      <div class="card blue">
+        <h3>Before You Begin</h3>
+        <p>
+          Have your annual salary or hourly rate available. This tool estimates gross pay and selected
+          deductions only. It does not calculate taxes or final payroll amounts.
+        </p>
+      </div>
+
+      <div class="card green">
+        <h3>How to Use This Tool</h3>
+        <ol class="welcome-steps">
+          <li>Begin with the Salary/Hourly Pay tab and enter your annual salary or hourly rate.</li>
+          <li>Enter your date of birth on the Salary/Hourly Pay tab. Your date of birth is used to calculate age-based benefit estimates.</li>
+          <li>Review the Healthcare Plan Comparison for factual differences between the available medical plans.</li>
+          <li>Use Healthcare Elections to select the benefits you would like to estimate.</li>
+          <li>Review your VRS retirement plan and any applicable voluntary retirement contributions.</li>
+          <li>Use Paycheck Impact to review estimated deductions and County-paid contributions.</li>
+          <li>Review the Summary tab for an overall estimate of your selections.</li>
+          <li>Use Benefits Education for additional factual information about the benefit options included in the calculator.</li>
+        </ol>
+      </div>
+
+      <div class="card red welcome-disclaimer">
+        <h3>Disclaimer</h3>
+        <p>
+          The calculator presents factual information to help employees understand available options.
+          It does not recommend a plan, contribution amount, or benefit election. Employees should review
+          official plan documents and consult personal advisors as appropriate.
+        </p>
       </div>
     </div>
-    <div class="intro-card">
-      <h2>Before You Begin</h2>
-      <p>Have your annual salary or hourly rate available. This tool estimates gross pay and selected deductions only. It does not calculate taxes or final payroll amounts.</p>
-    </div>
-  </section>
-
-  <nav class="tabs" aria-label="Calculator sections">
-    <button type="button" class="tab active" data-panel="pay">1. Salary/Hourly Pay</button>
-    <button type="button" class="tab" data-panel="compare">2. Healthcare Plan Comparison</button>
-    <button type="button" class="tab" data-panel="elections">3. Healthcare Elections</button>
-    <button type="button" class="tab" data-panel="retirement">4. Retirement Elections</button>
-    <button type="button" class="tab" data-panel="impact">5. Paycheck Impact</button>
-    <button type="button" class="tab" data-panel="summary">6. Summary</button>
-    <button type="button" class="tab" data-panel="education">7. Benefits Education</button>
-  </nav>
-
-  <div class="mobile-nav">
-    <label for="mobileSection">Choose a section</label>
-    <select id="mobileSection"></select>
   </div>
+</section>
 
-  <section id="pay" class="panel active">
+  <section id="pay" class="panel">
     <div class="grid">
       <div>
         <div class="section-heading"><div class="section-icon" aria-hidden="true">💵</div><h2>Salary/Hourly Pay</h2></div>
@@ -208,7 +244,7 @@
 
       <div id="traditionalFsaCard" class="card green hidden">
         <h3>Traditional Plan Account</h3>
-        <label for="healthFsaAnnual">Health Care FSA Annual Election</label>
+        <label for="healthFsaAnnual">Healthcare FSA Annual Election</label>
         <input id="healthFsaAnnual" type="number" min="0" max="3400" step="50" value="0">
         <div class="small">Maximum $3,400. May be used for eligible medical, dental, and vision expenses.</div>
       </div>
@@ -285,55 +321,104 @@
   </section>
 
   <section id="retirement" class="panel">
-    <div class="section-heading"><div class="section-icon" aria-hidden="true">🏦</div><h2>Retirement Elections</h2></div>
-    <div class="grid">
-      <div>
-        <div class="card blue">
-          <label for="retirementPlan">VRS Retirement Plan</label>
-          <select id="retirementPlan"><option value="plan1">Plan 1</option><option value="plan2">Plan 2</option><option value="hybrid" selected>Hybrid</option></select>
-          <div id="retirementDesign" class="callout"></div>
-        </div>
-        <div id="hybridVoluntaryCard" class="card green">
-          <h3>Defined Contribution Plan & County Match</h3>
-          <p>Hybrid Plan members may voluntarily contribute between 0% and 4% of eligible compensation. The County match to the 401(a) account is based on the elected percentage.</p>
-          <label for="dcPercent">Employee Voluntary Contribution</label>
-          <select id="dcPercent"><option value="0">0.00%</option><option value=".5">0.50%</option><option value="1">1.00%</option><option value="1.5">1.50%</option><option value="2">2.00%</option><option value="2.5">2.50%</option><option value="3">3.00%</option><option value="3.5">3.50%</option><option value="4">4.00%</option></select>
-          <details>
-            <summary>View County matching percentages</summary>
-            <div class="details-body">
-              <div class="table-scroll">
-                <table>
-                  <thead><tr><th>Employee Voluntary Contribution</th><th>County 401(a) Match</th></tr></thead>
-                  <tbody>
-                    <tr><td>0.00%</td><td>0.00%</td></tr>
-                    <tr><td>0.50%</td><td>0.50%</td></tr>
-                    <tr><td>1.00%</td><td>1.00%</td></tr>
-                    <tr><td>1.50%</td><td>1.25%</td></tr>
-                    <tr><td>2.00%</td><td>1.50%</td></tr>
-                    <tr><td>2.50%</td><td>1.75%</td></tr>
-                    <tr><td>3.00%</td><td>2.00%</td></tr>
-                    <tr><td>3.50%</td><td>2.25%</td></tr>
-                    <tr><td>4.00%</td><td>2.50%</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </details>
+  <div class="section-heading">
+    <div class="section-icon" aria-hidden="true">🏦</div>
+    <h2>Retirement Elections</h2>
+  </div>
 
+  <div class="grid">
+    <div>
+      <div class="card blue">
+        <label for="retirementPlan">VRS Retirement Plan</label>
+        <select id="retirementPlan">
+          <option value="plan1">Plan 1</option>
+          <option value="plan2">Plan 2</option>
+          <option value="hybrid" selected>Hybrid</option>
+        </select>
+
+        <div id="retirementDesign" class="callout"></div>
+      </div>
+
+      <div id="hybridVoluntaryCard" class="card green">
+        <h3>Voluntary Defined Contribution Plan (457(b)) &amp; County Match (401(a))</h3>
+
+        <p>
+          Hybrid Plan members may voluntarily contribute between 0% and 4% of their gross base income
+          to the 457(b) plan. The County match to the 401(a) account is based on the elected percentage.
+        </p>
+
+        <label for="dcPercent">Employee Voluntary Contribution</label>
+        <select id="dcPercent">
+          <option value="0">0.00%</option>
+          <option value=".5">0.50%</option>
+          <option value="1">1.00%</option>
+          <option value="1.5">1.50%</option>
+          <option value="2">2.00%</option>
+          <option value="2.5">2.50%</option>
+          <option value="3">3.00%</option>
+          <option value="3.5">3.50%</option>
+          <option value="4">4.00%</option>
+        </select>
+
+        <h3>County Matching Percentages</h3>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Employee Voluntary Contribution</th>
+                <th>County 401(a) Match</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>0.00%</td><td>0.00%</td></tr>
+              <tr><td>0.50%</td><td>0.50%</td></tr>
+              <tr><td>1.00%</td><td>1.00%</td></tr>
+              <tr><td>1.50%</td><td>1.25%</td></tr>
+              <tr><td>2.00%</td><td>1.50%</td></tr>
+              <tr><td>2.50%</td><td>1.75%</td></tr>
+              <tr><td>3.00%</td><td>2.00%</td></tr>
+              <tr><td>3.50%</td><td>2.25%</td></tr>
+              <tr><td>4.00%</td><td>2.50%</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
-      <aside>
-        <div class="card">
-          <h3>Estimated Retirement Deductions</h3>
-          <div class="kpi"><span>Mandatory employee contribution per pay</span><strong id="retMandatoryPerPay">$0.00</strong></div>
-          <div class="kpi"><span>Voluntary employee contribution per pay</span><strong id="retVoluntaryPerPay">$0.00</strong></div>
-          <div class="kpi"><span>County 401(a) match per pay</span><strong id="retMatchPerPay">$0.00</strong></div>
-        </div>
-      </aside>
     </div>
-  </section>
 
-  <section id="impact" class="panel">
+    <aside>
+      <div class="card">
+        <h3>Estimated Employee Retirement Deduction</h3>
+
+        <div class="kpi">
+          <span>Mandatory employee contribution per pay period</span>
+          <strong id="retMandatoryPerPay">$0.00</strong>
+        </div>
+
+        <div class="kpi">
+          <span>Voluntary employee contribution per pay period</span>
+          <strong id="retVoluntaryPerPay">$0.00</strong>
+        </div>
+      </div>
+
+      <div class="card green">
+        <h3>Estimated County (401(a)) Match per pay period</h3>
+
+        <div class="kpi">
+          <span>County 401(a) match per pay period</span>
+          <strong id="retMatchPerPay">$0.00</strong>
+        </div>
+
+        <p class="small">
+          For Hybrid Plan members, this estimate includes the County's mandatory 1% match and any
+          applicable County match associated with the employee's voluntary 457(b) contribution.
+        </p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section id="impact" class="panel">
     <div class="section-heading"><div class="section-icon" aria-hidden="true">🧾</div><h2>Paycheck Impact</h2></div>
     <div class="grid">
       <div class="card green">
@@ -341,7 +426,7 @@
         <div class="kpi"><span>Gross pay per pay period</span><strong id="impactGross">$0.00</strong></div>
         <div class="kpi"><span>Healthcare elections</span><strong id="impactBenefits">$0.00</strong></div>
         <div class="kpi"><span>Retirement deductions</span><strong id="impactRetirement">$0.00</strong></div>
-        <div class="kpi"><span>Total selected deductions</span><strong id="impactTotalDeductions">$0.00</strong></div>
+        <div class="kpi"><span>Total deductions</span><strong id="impactTotalDeductions">$0.00</strong></div>
         <div class="kpi"><span>Estimated pay before taxes</span><strong id="impactAfter">$0.00</strong></div>
       </div>
       <aside>
@@ -381,15 +466,99 @@
   </section>
 
   <section id="education" class="panel">
-    <div class="section-heading"><div class="section-icon" aria-hidden="true">📘</div><h2>Benefits Education</h2></div>
-    <details open><summary>Understanding the HSA Plan and Traditional Plan</summary><div class="details-body"><p>The HSA Plan generally has lower employee premiums and higher deductible exposure. The Traditional Plan generally has higher employee premiums and lower deductible exposure. Both plans include preventive care and routine vision benefits. Voluntary Vision provides additional vision benefits such as frame, lens, and contact allowances.</p></div></details>
-    <details><summary>What is an HSA?</summary><div class="details-body"><p>An HSA is a tax-advantaged account available to eligible employees enrolled in the HSA Plan. Contributions may be made through payroll or during the year, funds roll over, the account belongs to the employee, and eligible funds may be invested. Qualified expenses include medical, dental, vision, prescription, deductible, copayment, and coinsurance expenses.</p><p>2026 limits: $4,400 for employee-only coverage and $8,750 for family coverage, plus a $1,000 catch-up contribution for eligible individuals age 55 or older. Limits include employee and employer contributions.</p></div></details>
-    <details><summary>Flexible Spending Accounts</summary><div class="details-body"><p>Health Care and Limited Purpose FSAs have a $3,400 annual limit for the plan year beginning July 1, 2026. Up to $680 may roll over. The Dependent Care FSA limit is $7,500, or $3,750 if married filing separately, and has no rollover.</p><p>Employees enrolled in the HSA Plan cannot enroll in a full Health Care FSA. A Limited Purpose FSA can only be used for eligible dental and vision expenses. FSA elections are generally made during new-hire enrollment, open enrollment, or after a qualifying event, and must be re-elected each year.</p></div></details>
-    <details><summary>Voluntary Disability Insurance</summary><div class="details-body"><p>Short-Term Disability may replace 60% of weekly pre-disability earnings, subject to plan limits and waiting periods. Long-Term Disability is intended for qualifying disabilities lasting beyond the LTD waiting period. Eligibility depends on VRS plan and service time.</p></div></details>
-    <details><summary>Voluntary Critical Illness</summary><div class="details-body"><p>Critical Illness coverage pays a lump-sum benefit upon diagnosis of a covered condition. Employee and spouse coverage are available at $10,000 or $20,000. Spouse coverage cannot exceed employee coverage. Dependent children are automatically covered at 50% of the employee election at no additional cost.</p></div></details>
-    <details><summary>Optional Group Life Insurance</summary><div class="details-body"><p>Employees may elect one to eight times creditable compensation, subject to plan maximums. Spouse and child coverage must follow the same option row. Some elections may require Evidence of Insurability. Basic group life is County-provided and is separate from optional life.</p></div></details>
-    <details><summary>Educational Information</summary><div class="details-body"><p>The calculator presents factual information to help employees understand available options. It does not recommend a plan, contribution amount, or benefit election. Employees should review official plan documents and consult personal advisors as appropriate.</p></div></details>
-  </section>
+  <div class="section-heading">
+    <div class="section-icon" aria-hidden="true">📘</div>
+    <h2>Benefits Education</h2>
+  </div>
+
+  <details open>
+    <summary>Understanding the HSA Plan and Traditional Plan</summary>
+    <div class="details-body">
+      <p>
+        The HSA Plan has lower employee premiums and higher deductible exposure.
+        The Traditional Plan has higher employee premiums and lower deductible exposure.
+        Both plans include preventive care and routine vision benefits.
+      </p>
+    </div>
+  </details>
+
+  <details>
+    <summary>What is an HSA?</summary>
+    <div class="details-body">
+      <p>
+        An HSA is a tax-advantaged account available to eligible employees enrolled in the HSA Plan.
+      </p>
+
+      <ul>
+        <li>Contributions are made through payroll deduction.</li>
+        <li>Funds in another HSA can be rolled over to consolidate.</li>
+        <li>The account belongs to the employee.</li>
+        <li>Funds in the HSA may be invested.</li>
+        <li>Qualified expenses include medical, dental, vision, prescription, deductible, copayment, and coinsurance expenses.</li>
+      </ul>
+
+      <p>
+        2026 limits: $4,400 for employee-only coverage and $8,750 for family coverage,
+        plus a $1,000 catch-up contribution for eligible individuals age 55 or older.
+        Limits include employee and employer contributions.
+      </p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Flexible Spending Accounts</summary>
+    <div class="details-body">
+      <p>
+        Health Care and Limited Purpose FSAs have a $3,400 annual limit for the plan year beginning
+        July 1, 2026. Up to $680 may roll over. The Dependent Care FSA limit is $7,500,
+        or $3,750 if married filing separately, and has no rollover.
+      </p>
+
+      <p>
+        Employees enrolled in the HSA Plan are not eligible to enroll in a Healthcare FSA;
+        however, they can enroll in a Limited Purpose FSA, which can be used for dental and vision expenses only.
+      </p>
+
+      <p>
+        FSA elections are made during new-hire enrollment, open enrollment, or after a qualifying event,
+        and must be re-elected each year.
+      </p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Voluntary Disability Insurance</summary>
+    <div class="details-body">
+      <p>
+        Short-Term Disability may replace 60% of weekly pre-disability earnings, subject to plan limits
+        and waiting periods. Long-Term Disability is intended for qualifying disabilities lasting beyond
+        the LTD waiting period. Eligibility depends on VRS plan and service time.
+      </p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Voluntary Critical Illness</summary>
+    <div class="details-body">
+      <p>
+        Critical Illness coverage pays a lump-sum benefit upon diagnosis of a covered condition.
+        Employee and spouse coverage are available at $10,000 or $20,000. Spouse coverage cannot exceed
+        employee coverage. Dependent children are automatically covered at 50% of the employee election
+        at no additional cost.
+      </p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Optional Group Life Insurance</summary>
+    <div class="details-body">
+      <p>
+        Employees may elect one to eight times their annual salary, subject to plan maximums.
+        Spouse and child coverage are available based on the employee's election.
+      </p>
+    </div>
+  </details>
+</section>
 </main>
 
 <button class="backtop" type="button" id="backTop">Back to top ↑</button>
