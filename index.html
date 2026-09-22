@@ -384,6 +384,41 @@
           </table>
         </div>
       </div>
+<div class="card blue" id="empowerSupplementalCard">
+  <h3>Empower Supplemental Defined Contribution Plan 457(b) and 401(a)</h3>
+
+  <p>
+    James City County allows employees to save more for retirement under the
+    Supplemental Defined Contribution Plan with Empower. This is available to
+    all full-time and part-time employees.
+  </p>
+
+  <label for="empowerContribution">
+    Employee 457(b) Contribution per Pay Period
+  </label>
+
+  <div class="money-input">
+    <span>$</span>
+    <input
+      type="number"
+      id="empowerContribution"
+      min="0"
+      step="0.01"
+      value="0.00"
+      inputmode="decimal"
+      aria-label="Employee supplemental 457(b) contribution per pay period"
+    >
+  </div>
+
+  <p class="small">
+    The County matches 50% of the employee contribution, up to $7.50 per pay period.
+  </p>
+
+  <div class="kpi">
+    <span>Estimated County 401(a) match per pay period</span>
+    <strong id="empowerMatchPerPay">$0.00</strong>
+  </div>
+</div>
     </div>
 
     <aside>
@@ -401,21 +436,22 @@
         </div>
       </div>
 
-      <div class="card green">
-        <h3>Estimated County (401(a)) Match per pay period</h3>
+     <div class="card green">
+  <h3>Estimated County 401(a) Contributions per Pay Period</h3>
 
-        <div class="kpi">
-          <span>County 401(a) match per pay period</span>
-          <strong id="retMatchPerPay">$0.00</strong>
-        </div>
-
-        <p class="small">
-          For Hybrid Plan members, this estimate includes the County's mandatory 1% match and any
-          applicable County match associated with the employee's voluntary 457(b) contribution.
-        </p>
-      </div>
-    </aside>
+  <div class="kpi">
+    <span>Total County 401(a) Contributions per pay Period</span>
+    <strong id="retMatchPerPay">$0.00</strong>
   </div>
+
+  <p class="small">
+    For Hybrid Plan members, this estimate includes the County's mandatory 1%
+    contribution and any applicable County match associated with the employee's
+    voluntary Hybrid 457(b) contribution. If the employee elects a contribution
+    to the Empower Supplemental Defined Contribution Plan, the estimate also
+    includes the applicable County 401(a) match.
+  </p>
+</div>
 </section>
 
 <section id="impact" class="panel">

@@ -151,7 +151,12 @@ function retirementCosts(pay){
     voluntaryCountyMatch=pay.gross*(rates.dcMatch[pct]||0)/100;
   }
 
+  // Empower Supplemental Defined Contribution Plan
+  const empowerContribution=Math.max(0,num("empowerContribution"));
+  const empowerMatch=Math.min(empowerContribution*.50,7.50);
+
   const match=mandatoryCountyMatch+voluntaryCountyMatch;
+  const total=mandatory+voluntary+empowerContribution;
 
   return {
     mandatory,
@@ -159,7 +164,9 @@ function retirementCosts(pay){
     mandatoryCountyMatch,
     voluntaryCountyMatch,
     match,
-    total:mandatory+voluntary
+    empowerContribution,
+    empowerMatch,
+    total
   };
 }
 function calculate(){
@@ -283,11 +290,11 @@ if(plan==="hybrid"){
   `;
 }
   el("hybridVoluntaryCard").classList.toggle("hidden",plan!=="hybrid");
-  text("retMandatoryPerPay",money(r.mandatory));text("retVoluntaryPerPay",money(r.voluntary));text("retMatchPerPay",money(r.match));
+  text("retMandatoryPerPay",money(r.mandatory));text("retVoluntaryPerPay",money(r.voluntary+r.empowerContribution));text("retMatchPerPay",money(r.match+r.empowerMatch));text("empowerMatchPerPay",money(r.empowerMatch));
 
-  const totalDed=c.total+r.total,after=pay.gross-totalDed,county=c.county+r.match;
+  const totalDed=c.total+r.total,after=pay.gross-totalDed,county=c.county+r.match+r.empowerMatch;
   text("impactGross",money(pay.gross));text("impactBenefits",money(c.total));text("impactRetirement",money(r.total));text("impactTotalDeductions",money(totalDed));text("impactAfter",money(after));
-  text("countyMedical",money(c.medCounty));text("countyDental",money(c.dentCounty));text("countyHsaBase",money(c.hsaBase));text("countyHsaMatch",money(c.hsaMatch));text("countyRetMatch",money(r.match));text("countyTotal",money(county));
+  text("countyMedical",money(c.medCounty));text("countyDental",money(c.dentCounty));text("countyHsaBase",money(c.hsaBase));text("countyHsaMatch",money(c.hsaMatch));text("countyRetMatch",money(r.match+r.empowerMatch));text("countyTotal",money(county));
   text("sumAnnual",money(pay.annual));text("sumFuturePct",futurePct.toFixed(2)+"%");text("sumFutureAnnual",money(futureAnnual));text("sumGross",money(pay.gross));text("sumBenefits",money(c.total));text("sumRetirement",money(r.total));text("sumAfter",money(after));text("sumCounty",money(county));text("sumCountyAnnual",money(county*PAY_PERIODS));
 }
 function reset(){
@@ -295,7 +302,7 @@ function reset(){
   value("annualSalary",55000);value("hourlyRate",26.44);value("hoursWeek",40);value("futureIncreasePct",0);value("dob","");value("tobacco","non");value("coverSpouse","no");value("spouseDob","");
   value("medicalPlan","hsa");value("medicalCoverage","employee");value("dentalPlan","ppo1");value("dentalCoverage","employee");value("visionCoverage","employee");
   value("hsaEmployeePerPay",0);value("healthFsaAnnual",0);value("limitedFsaAnnual",0);value("dependentFsaAnnual",0);value("ciEmployeeCoverage","0");value("ciSpouseCoverage","0");
-  value("stdEnroll","no");value("ltdEnroll","no");value("lifeOption","0");value("includeSpouseLife","no");value("includeChildLife","no");value("retirementPlan","hybrid");value("dcPercent","0");
+  value("stdEnroll","no");value("ltdEnroll","no");value("lifeOption","0");value("includeSpouseLife","no");value("includeChildLife","no");value("retirementPlan","hybrid");value("dcPercent","0");value("empowerContribution",0);
   document.querySelectorAll(".benefit-toggle").forEach(x=>x.checked=["medical","dental","vision"].includes(x.value));
   calculate();showPanel("welcome");
 }
