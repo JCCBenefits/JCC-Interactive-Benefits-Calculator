@@ -33,6 +33,56 @@ function el(id){return document.getElementById(id)}
 function num(id){const n=parseFloat(el(id)?.value);return Number.isFinite(n)?n:0}
 function val(id){return el(id)?.value||""}
 function money(n){return (Number.isFinite(n)?n:0).toLocaleString("en-US",{style:"currency",currency:"USD"})}
+
+function estimateFica(taxableWages, ytdSSWages, ytdMedicareWages, taxYear) {
+
+  const socialSecurityLimits = {
+    "2026": 184500,
+    "2027": 192300
+  };
+
+  const annualLimit = socialSecurityLimits[String(taxYear)];
+
+  if (annualLimit === undefined) return null;
+
+  const wages = Math.round(Math.max(0, Number(taxableWages) || 0) * 100) / 100;
+  const previousSS = Math.max(0, Number(ytdSSWages) || 0);
+  const previousMedicare = Math.max(0, Number(ytdMedicareWages) || 0);
+
+  const roundCents = amount =>
+    Math.round((amount + Number.EPSILON) * 100) / 100;
+
+  // Social Security is subject to the annual wage limit.
+  const ssTaxableWages = Math.min(
+    wages,
+    Math.max(0, annualLimit - previousSS)
+  );
+
+  // Additional Medicare starts when calendar-year
+  // Medicare wages paid by the employer exceed $200,000.
+  const additionalMedicareWages = Math.min(
+    wages,
+    Math.max(0, previousMedicare + wages - 200000)
+  );
+
+  const socialSecurity = roundCents(ssTaxableWages * 0.062);
+  const medicare = roundCents(wages * 0.0145);
+  const additionalMedicare = roundCents(additionalMedicareWages * 0.009);
+
+  return {
+    employeeSocialSecurity: socialSecurity,
+    employeeMedicare: medicare,
+    employeeAdditionalMedicare: additionalMedicare,
+    employeeFicaTotal: roundCents(
+      socialSecurity + medicare + additionalMedicare
+    ),
+
+    countySocialSecurity: socialSecurity,
+    countyMedicare: medicare,
+    countyFicaTotal: roundCents(socialSecurity + medicare)
+  };
+}
+
 function text(id,v){if(el(id))el(id).textContent=v}
 function value(id,v){if(el(id))el(id).value=v}
 function ageAsOf(dateString,asOf=planYearDate){
@@ -170,10 +220,111 @@ function retirementCosts(pay){
   };
 }
 function calculate(){
-  const mode=document.querySelector('input[name="payMode"]:checked')?.value||"salary";
-  el("salaryBox").classList.toggle("hidden",mode!=="salary");
-  el("hourlyBox").classList.toggle("hidden",mode!=="hourly");
-  const pay=getPay();
+ 
+const mode=document.querySelector('input[name="payMode"]:checked')?.value||"salary";
+
+el("salaryBox").classList.toggle("hidden",mode!=="salary");
+el("hourlyBox").classList.toggle("hidden",mode!=="hourly");
+
+// Show the selected hourly paycheck calculation method
+const hourlyEstimateMode=document.querySelector(
+  'input[name="hourlyEstimateMode"]:checked'
+)?.value||"average";
+
+el("averageHoursBox").classList.toggle(
+  "hidden",mode!=="hourly"||hourlyEstimateMode!=="average"
+);
+
+el("specificPaycheckBox").classList.toggle(
+  "hidden",mode!=="hourly"||hourlyEstimateMode!=="specific"
+);
+// Display annualized pay information only when appropriate
+el("annualPaySummary").classList.toggle(
+  "hidden",mode==="hourly"&&hourlyEstimateMode==="specific"
+);
+// Calculate estimated earnings for a specific paycheck
+const hourlyRate=Math.max(0,num("hourlyRate"));
+const regularHours=Math.max(0,num("specificRegularHours"));
+const overtimeHours=Math.max(0,num("specificOvertimeHours"));
+
+
+const overtimeRate=hourlyRate*1.5;
+
+const regularGross=regularHours*hourlyRate;
+const overtimeGross=overtimeHours*overtimeRate;
+const specificGross=regularGross+overtimeGross;
+
+// Display the specific paycheck earnings breakdown
+text("specificRegularGross",money(regularGross));
+text("specificOvertimeRate",overtimeHours>0 ? money(overtimeRate) : "—");
+text("specificOvertimeGross",money(overtimeGross));
+text("specificGrossPreview",money(specificGross));
+
+// Average paycheck estimate with separate overtime earnings
+const averageRegularHours=Math.max(0,num("hoursWeek"));
+const averageOvertimeHours=Math.max(0,num("averageOvertimeHours"));
+
+const averageRegularGross=
+  (hourlyRate*averageRegularHours*52)/PAY_PERIODS;
+
+const averageOvertimeGross=
+  (hourlyRate*1.5*averageOvertimeHours*52)/PAY_PERIODS;
+
+const averageTotalGross=averageRegularGross+averageOvertimeGross;
+
+text("averageRegularGross",money(averageRegularGross));
+
+text(
+  "averageOvertimeRate",
+  averageOvertimeHours>0 ? money(hourlyRate*1.5) : "—"
+);
+
+text("averageOvertimeGross",money(averageOvertimeGross));
+text("averageTotalGross",money(averageTotalGross));
+
+// Preserve existing annualized benefits calculations
+const pay=getPay();
+
+const isHourlyEstimate=mode==="hourly";
+
+const isSpecificHourly=
+  isHourlyEstimate&&hourlyEstimateMode==="specific";
+
+// Display hourly earnings breakdown only for hourly employees
+el("impactHourlyEarnings").classList.toggle(
+  "hidden",!isHourlyEstimate
+);
+
+text(
+  "impactHourlyEstimateType",
+  isSpecificHourly
+    ? "Specific Paycheck Estimate"
+    : "Average Paycheck Estimate"
+);
+
+text(
+  "impactHourlyRegular",
+  money(isSpecificHourly?regularGross:averageRegularGross)
+);
+
+text(
+  "impactHourlyOvertime",
+  money(isSpecificHourly?overtimeGross:averageOvertimeGross)
+);
+
+text(
+  "impactHourlyTotal",
+  money(isSpecificHourly?specificGross:averageTotalGross)
+);
+
+// Manual federal and Virginia income tax withholding
+const federalWithholding=Math.max(0,num("federalWithholdingPerPay"));
+const virginiaWithholding=Math.max(0,num("virginiaWithholdingPerPay"));
+
+const manualIncomeTaxTotal=federalWithholding+virginiaWithholding;
+
+text("manualIncomeTaxTotal",money(manualIncomeTaxTotal));
+
   value("annualHours",pay.annualHours.toFixed(0));
   value("grossPerPayInput",money(pay.gross));
   text("grossPerPay",money(pay.gross));text("annualGross",money(pay.annual));text("monthlyGross",money(pay.monthly));text("hourlyEquivalent",money(pay.hourly));
@@ -198,6 +349,52 @@ function calculate(){
 
   const c=benefitCosts(pay,age,spouseAge);
   const r=retirementCosts(pay);
+
+  // Preliminary employee and County FICA estimates
+
+  // Use the selected paycheck's gross earnings.
+  const ficaGross=mode==="hourly"
+    ? (hourlyEstimateMode==="specific"
+        ? specificGross
+        : averageTotalGross)
+    : pay.gross;
+
+  // Assumed FICA-exempt benefit deductions.
+  // These classifications must be confirmed with Payroll.
+  const ficaPretaxDeductions=
+    c.med+
+    c.dent+
+    c.vision+
+    c.hsaEmp+
+    c.healthFsa+
+    c.limitedFsa+
+    c.depFsa;
+
+  // Retirement contributions are not deducted here.
+  const ficaTaxableWages=Math.max(
+    0,
+    ficaGross-ficaPretaxDeductions
+  );
+text("ficaTaxableWagesPerPay",money(ficaTaxableWages));
+  const fica=estimateFica(
+    ficaTaxableWages,
+    num("ytdSocialSecurityWages"),
+    num("ytdMedicareWages"),
+    val("ficaTaxYear")
+  );
+
+  if(fica){
+    // Employee payroll taxes
+    text("employeeSocialSecurity",money(fica.employeeSocialSecurity));
+    text("employeeMedicare",money(fica.employeeMedicare));
+    text("employeeAdditionalMedicare",money(fica.employeeAdditionalMedicare));
+    text("employeeFicaTotal",money(fica.employeeFicaTotal));
+
+    // County-paid payroll taxes
+    text("countySocialSecurity",money(fica.countySocialSecurity));
+    text("countyMedicare",money(fica.countyMedicare));
+    text("countyFicaTotal",money(fica.countyFicaTotal));
+  }
 
   text("medPerPay",money(c.med));text("medCountyPerPay",money(c.medCounty));
   text("dentPerPay",money(c.dent));text("dentCountyPerPay",money(c.dentCounty));
@@ -293,7 +490,172 @@ if(plan==="hybrid"){
   text("retMandatoryPerPay",money(r.mandatory));text("retVoluntaryPerPay",money(r.voluntary+r.empowerContribution));text("retMatchPerPay",money(r.match+r.empowerMatch));text("empowerMatchPerPay",money(r.empowerMatch));
 
   const totalDed=c.total+r.total,after=pay.gross-totalDed,county=c.county+r.match+r.empowerMatch;
-  text("impactGross",money(pay.gross));text("impactBenefits",money(c.total));text("impactRetirement",money(r.total));text("impactTotalDeductions",money(totalDed));text("impactAfter",money(after));
+  
+  // Annual Compensation and Benefits Summary
+
+  const annualRewardsIsSpecific =
+    mode==="hourly" && hourlyEstimateMode==="specific";
+
+  // Base annual earnings exclude projected overtime.
+  const annualRewardsBase=pay.annual;
+
+  // Project qualifying overtime across 52 weeks.
+  const annualRewardsOvertime=mode==="hourly"
+    ? Math.max(0,num("hourlyRate")) *
+      1.5 *
+      Math.max(0,num("averageOvertimeHours")) *
+      52
+    : 0;
+
+  const annualRewardsGross=
+    annualRewardsBase+annualRewardsOvertime;
+
+  // Annualize County-paid benefits currently calculated.
+  const annualRewardsBenefits=c.county*PAY_PERIODS;
+
+  // County 401(a) contributions and Empower matching.
+  const annualRewardsRetirement=
+    (r.match+r.empowerMatch)*PAY_PERIODS;
+
+  const annualRewardsCounty=
+    annualRewardsBenefits+annualRewardsRetirement;
+
+  const annualRewardsTotal=
+    annualRewardsGross+annualRewardsCounty;
+
+  // Specific paycheck amounts should not be used to
+  // project annual compensation.
+  if(annualRewardsIsSpecific){
+
+    [
+      "rewardsBaseAnnual",
+      "rewardsOvertimeAnnual",
+      "rewardsGrossAnnual",
+      "rewardsBenefitsAnnual",
+      "rewardsRetirementAnnual",
+      "rewardsCountyBenefitsAnnual",
+      "rewardsTotalAnnual"
+    ].forEach(id=>text(id,"—"));
+
+  }else{
+
+    text("rewardsBaseAnnual",money(annualRewardsBase));
+    text("rewardsOvertimeAnnual",money(annualRewardsOvertime));
+    text("rewardsGrossAnnual",money(annualRewardsGross));
+
+    text("rewardsBenefitsAnnual",money(annualRewardsBenefits));
+    text("rewardsRetirementAnnual",money(annualRewardsRetirement));
+
+    text("rewardsCountyBenefitsAnnual",money(annualRewardsCounty));
+    text("rewardsTotalAnnual",money(annualRewardsTotal));
+
+  }
+
+  
+  // Preliminary annual County FICA projection.
+  // Uses a full calendar year of projected earnings and deductions.
+  // Payroll must validate the pretax benefit classifications.
+
+  const annualFicaTaxableWages=Math.max(
+    0,
+    Math.round(
+      (annualRewardsGross - ficaPretaxDeductions * PAY_PERIODS) * 100
+    ) / 100
+  );
+
+  // A full-year projection starts with zero prior-year wages.
+  // The selected tax year determines the Social Security wage limit.
+  const annualCountyFica=estimateFica(
+    annualFicaTaxableWages,
+    0,
+    0,
+    val("ficaTaxYear")
+  );
+
+  if(!annualRewardsIsSpecific && annualCountyFica){
+
+    const annualCountyFicaTotal=annualCountyFica.countyFicaTotal;
+
+    const annualCountyInvestment=
+      annualRewardsTotal+annualCountyFicaTotal;
+
+    text(
+      "rewardsCountyFicaAnnual",
+      money(annualCountyFicaTotal)
+    );
+
+    text(
+      "rewardsInvestmentAnnual",
+      money(annualCountyInvestment)
+    );
+
+  }else{
+
+    text("rewardsCountyFicaAnnual","—");
+    text("rewardsInvestmentAnnual","—");
+
+  }
+
+
+  // Estimated take-home pay
+  // Round displayed paycheck amounts consistently to cents.
+  const roundPay = n =>
+    Math.round((n + Number.EPSILON) * 100) / 100;
+
+  const takeHomeIsSpecific =
+    mode === "hourly" && hourlyEstimateMode === "specific";
+
+  // Salaried employees use regular gross pay.
+  // Hourly average estimates include projected overtime.
+  const estimatedGross = roundPay(
+    mode === "hourly"
+      ? (takeHomeIsSpecific ? specificGross : averageTotalGross)
+      : pay.gross
+  );
+
+  text("takeHomeGross", money(estimatedGross));
+
+  if (takeHomeIsSpecific) {
+    // Specific-paycheck deductions have not yet been validated.
+    text("takeHomeDeductions", "—");
+    text("takeHomeIncomeTax", "—");
+    text("takeHomeFica", "—");
+    text("takeHomePay", "—");
+
+    text(
+      "takeHomeNote",
+      "The specific-paycheck gross earnings estimate is available. " +
+      "Estimated take-home pay will be enabled after paycheck-specific " +
+      "benefit and retirement deductions are validated."
+    );
+  } else {
+    const selectedDeductions = roundPay(totalDed);
+    const enteredIncomeTax = roundPay(manualIncomeTaxTotal);
+    const employeeFicaAmount = fica
+      ? roundPay(fica.employeeFicaTotal)
+      : 0;
+
+    const estimatedTakeHome = roundPay(
+      estimatedGross -
+      selectedDeductions -
+      enteredIncomeTax -
+      employeeFicaAmount
+    );
+
+    text("takeHomeDeductions", money(selectedDeductions));
+    text("takeHomeIncomeTax", money(enteredIncomeTax));
+    text("takeHomeFica", fica ? money(employeeFicaAmount) : "—");
+    text("takeHomePay", fica ? money(estimatedTakeHome) : "—");
+
+    text(
+      "takeHomeNote",
+      "This is an informational paycheck estimate. Federal and Virginia " +
+      "withholding amounts are entered manually and do not automatically " +
+      "adjust when earnings or benefits change. Actual pay may differ " +
+      "due to other deductions, withholding elections, and payroll adjustments."
+    );
+  }
+text("impactGross",money(pay.gross));text("impactBenefits",money(c.total));text("impactRetirement",money(r.total));text("impactTotalDeductions",money(totalDed));text("impactAfter",money(after));
   text("countyMedical",money(c.medCounty));text("countyDental",money(c.dentCounty));text("countyHsaBase",money(c.hsaBase));text("countyHsaMatch",money(c.hsaMatch));text("countyRetMatch",money(r.match+r.empowerMatch));text("countyTotal",money(county));
   text("sumAnnual",money(pay.annual));text("sumFuturePct",futurePct.toFixed(2)+"%");text("sumFutureAnnual",money(futureAnnual));text("sumGross",money(pay.gross));text("sumBenefits",money(c.total));text("sumRetirement",money(r.total));text("sumAfter",money(after));text("sumCounty",money(county));text("sumCountyAnnual",money(county*PAY_PERIODS));
 }
@@ -304,23 +666,481 @@ function reset(){
   value("hsaEmployeePerPay",0);value("healthFsaAnnual",0);value("limitedFsaAnnual",0);value("dependentFsaAnnual",0);value("ciEmployeeCoverage","0");value("ciSpouseCoverage","0");
   value("stdEnroll","no");value("ltdEnroll","no");value("lifeOption","0");value("includeSpouseLife","no");value("includeChildLife","no");value("retirementPlan","hybrid");value("dcPercent","0");value("empowerContribution",0);
   document.querySelectorAll(".benefit-toggle").forEach(x=>x.checked=["medical","dental","vision"].includes(x.value));
+
+// Reset hourly paycheck estimates
+value("averageOvertimeHours", 0);
+value("specificRegularHours", 80);
+value("specificOvertimeHours", 0);
+
+const averageModeRadio = document.querySelector(
+  'input[name="hourlyEstimateMode"][value="average"]'
+);
+if (averageModeRadio) averageModeRadio.checked = true;
+
+// Reset manually entered tax withholding
+value("federalWithholdingPerPay", 0);
+value("virginiaWithholdingPerPay", 0);
+
+// Reset FICA information
+value("ficaTaxYear", "2026");
+value("ytdSocialSecurityWages", 0);
+value("ytdMedicareWages", 0);
+
   calculate();showPanel("welcome");
 }
+
 function pdf(){
   calculate();
-  if(!window.jspdf?.jsPDF){alert("PDF generator did not load. Use Print / Save as PDF instead.");return}
-  const {jsPDF}=window.jspdf,doc=new jsPDF({unit:"pt",format:"letter"});
-  const lines=[
-    ["Annual gross pay",el("sumAnnual").textContent],["Gross pay per pay period",el("sumGross").textContent],
-    ["Healthcare deductions per pay",el("sumBenefits").textContent],["Retirement deductions per pay",el("sumRetirement").textContent],
-    ["Estimated pay before taxes",el("sumAfter").textContent],["County contributions per pay",el("sumCounty").textContent],
-    ["Estimated annual County contributions",el("sumCountyAnnual").textContent]
-  ];
-  doc.setFont("helvetica","bold");doc.setFontSize(18);doc.text("James City County Interactive Benefits Calculator",48,54);
-  doc.setFont("helvetica","normal");doc.setFontSize(10);doc.text("Informational estimate only. Official plan documents and payroll records control.",48,76);
-  let y=110;lines.forEach(([a,b])=>{doc.setFont("helvetica","normal");doc.text(a,55,y);doc.setFont("helvetica","bold");doc.text(b,410,y);y+=24});
-  doc.save("JCC_Interactive_Benefits_Calculator_Summary.pdf");
+
+  if(!window.jspdf?.jsPDF){
+    alert("PDF generator did not load. Use Print / Save as PDF instead.");
+    return;
+  }
+
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:"pt",format:"letter"});
+
+  const pageWidth=doc.internal.pageSize.getWidth();
+  const pageHeight=doc.internal.pageSize.getHeight();
+  const margin=42;
+  let y=52;
+
+  // Read values already calculated on the website.
+  const getValue=id=>{
+    const result=el(id)?.textContent?.trim();
+    return !result||result==="—" ? "Not available" : result;
+  };
+
+  // Automatically create a new page if needed.
+  const checkPage=height=>{
+    if(y+height>pageHeight-65){
+      doc.addPage();
+      y=52;
+    }
+  };
+
+  // Add a section heading.
+  const addHeading=title=>{
+    checkPage(40);
+    y+=10;
+
+    doc.setFont("helvetica","bold");
+    doc.setFontSize(12);
+    doc.setTextColor(11,79,125);
+    doc.text(title,margin,y);
+
+    y+=10;
+    doc.setDrawColor(200,215,225);
+    doc.line(margin,y,pageWidth-margin,y);
+    y+=17;
+  };
+
+  // Add a label and its calculated value.
+  const addRow=(label,value,bold=false)=>{
+    doc.setFontSize(10);
+
+    const labelLines=doc.splitTextToSize(label,350);
+    const rowHeight=Math.max(18,labelLines.length*13+5);
+
+    checkPage(rowHeight);
+
+    doc.setFont("helvetica",bold?"bold":"normal");
+    doc.setTextColor(30,45,60);
+
+    doc.text(labelLines,margin,y);
+    doc.text(
+      String(value),
+      pageWidth-margin,
+      y,
+      {align:"right"}
+    );
+
+    y+=rowHeight;
+  };
+
+  // Add explanatory information with automatic wrapping.
+  const addNote=message=>{
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(9);
+    doc.setTextColor(85,95,105);
+
+    const lines=doc.splitTextToSize(
+      message,
+      pageWidth-(margin*2)
+    );
+
+    lines.forEach(line=>{
+      checkPage(14);
+      doc.text(line,margin,y);
+      y+=13;
+    });
+
+    y+=8;
+  };
+
+
+// Centered County logo and document heading
+
+
+  // Embed the County logo directly from the saved image data.
+  const logoData = window.JCC_COUNTY_LOGO;
+
+  if (typeof logoData === "string" &&
+      logoData.startsWith("data:image/jpeg;base64,")) {
+
+    try {
+      const logoProperties = doc.getImageProperties(logoData);
+
+      const maxLogoWidth = 110;
+      const maxLogoHeight = 65;
+
+      const scale = Math.min(
+        maxLogoWidth / logoProperties.width,
+        maxLogoHeight / logoProperties.height
+      );
+
+      const logoWidth = logoProperties.width * scale;
+      const logoHeight = logoProperties.height * scale;
+
+      doc.addImage(
+        logoData,
+        "JPEG",
+        (pageWidth - logoWidth) / 2,
+        y,
+        logoWidth,
+        logoHeight
+      );
+
+      y += logoHeight + 20;
+
+    } catch (error) {
+      console.error("County logo could not be embedded.", error);
+    }
+
+  } else {
+    console.warn("County logo data was not loaded.");
+  }
+
+
+// Center the main heading.
+doc.setFont("helvetica", "bold");
+doc.setTextColor(11, 79, 125);
+
+doc.setFontSize(18);
+doc.text(
+  "James City County",
+  pageWidth / 2,
+  y,
+  { align: "center" }
+);
+
+y += 24;
+
+doc.setFontSize(15);
+doc.text(
+  "Interactive Benefits Calculator",
+  pageWidth / 2,
+  y,
+  { align: "center" }
+);
+
+// Center the statement subtitle.
+y += 24;
+
+doc.setFont("helvetica", "normal");
+doc.setFontSize(11);
+doc.setTextColor(70, 80, 90);
+
+
+const isSpecificPaycheckPdf =
+  document.querySelector('input[name="payMode"]:checked')?.value === "hourly" &&
+  document.querySelector('input[name="hourlyEstimateMode"]:checked')?.value === "specific";
+
+const pdfStatementTitle = isSpecificPaycheckPdf
+  ? "Estimated Paycheck & Benefits Statement"
+  : "Estimated Total Compensation & Benefits Statement";
+
+doc.text(
+  pdfStatementTitle,
+  pageWidth / 2,
+  y,
+  { align: "center" }
+);
+
+// Center the date.
+y += 20;
+
+doc.setFontSize(9);
+
+doc.text(
+  "Generated: " + new Date().toLocaleDateString("en-US"),
+  pageWidth / 2,
+  y,
+  { align: "center" }
+);
+
+// Divider beneath the header.
+y += 20;
+
+doc.setDrawColor(200, 215, 225);
+doc.line(
+  margin,
+  y,
+  pageWidth - margin,
+  y
+);
+
+y += 25;
+
+
+  // Determine whether annual figures are available.
+  const payMode=document.querySelector(
+    'input[name="payMode"]:checked'
+  )?.value||"salary";
+
+  const hourlyMode=document.querySelector(
+    'input[name="hourlyEstimateMode"]:checked'
+  )?.value||"average";
+
+  const specificPaycheck=
+    payMode==="hourly"&&hourlyMode==="specific";
+
+// Show annual compensation sections only when applicable.
+if (!specificPaycheck) {
+  // Annual compensation
+  addHeading("Annual Gross Earnings");
+
+  if(specificPaycheck){
+    addNote(
+      "Annual compensation projections are not displayed " +
+      "for a specific paycheck estimate. Select Average " +
+      "Paycheck Estimate to view projected annual earnings."
+    );
+  }else{
+    addRow(
+      "Annual Base Gross Earnings",
+      getValue("rewardsBaseAnnual")
+    );
+
+    addRow(
+      "Projected Annual Overtime Earnings",
+      getValue("rewardsOvertimeAnnual")
+    );
+
+    addRow(
+      "Total Estimated Annual Gross Earnings",
+      getValue("rewardsGrossAnnual"),
+      true
+    );
+  }
+
+  // County-paid benefits
+  addHeading("Annual County Benefit Contributions");
+
+  addRow(
+    "County-Paid Healthcare and Other Selected Benefits",
+    getValue("rewardsBenefitsAnnual")
+  );
+
+  addRow(
+    "County Retirement Contributions and Matching",
+    getValue("rewardsRetirementAnnual")
+  );
+
+  addRow(
+    "Total Annual County Benefit Contributions",
+    getValue("rewardsCountyBenefitsAnnual"),
+    true
+  );
+
+  // Combined annual total
+  addHeading("Total Annual Compensation & Benefits");
+
+  addRow(
+    "Combined Annual Compensation and Benefits",
+    getValue("rewardsTotalAnnual"),
+    true
+  );
+
+  addNote(
+    "Includes only the County-paid benefits and retirement " +
+    "contributions modeled by this calculator. Other benefits " +
+    "and employer retirement costs may not be included."
+  );
+
+  // County payroll taxes
+  addHeading("Additional County-Paid Payroll Taxes");
+
+  addRow(
+    "Estimated Annual County Social Security and Medicare",
+    getValue("rewardsCountyFicaAnnual")
+  );
+
+  addRow(
+    "Estimated Total Annual County Employment Investment",
+    getValue("rewardsInvestmentAnnual"),
+    true
+  );
+
+  addNote(
+    "Employer-paid payroll taxes are additional County " +
+    "employment expenses, not additional employee " +
+    "compensation or benefits."
+  );
 }
+  // Keep the paycheck information together on one page.
+checkPage(220);
+
+addHeading("Estimated Paycheck Information");
+
+  addRow(
+    "Estimated Gross Earnings Per Paycheck",
+    getValue("takeHomeGross")
+  );
+
+  
+if(specificPaycheck){
+
+  addRow(
+    "Estimated Employee Social Security and Medicare",
+    getValue("employeeFicaTotal")
+  );
+
+  // Benefit and retirement estimates
+  addHeading("Selected Benefits - Per-Pay Estimates");
+
+  addRow(
+    "Selected Employee Benefit Deductions",
+    getValue("impactBenefits")
+  );
+
+  addRow(
+    "Estimated Retirement Deductions - Base Pay Reference",
+    getValue("impactRetirement")
+  );
+
+  // County-paid contributions
+  addHeading("County Contributions - Per-Pay Estimates");
+
+  addRow(
+    "County Medical Contribution",
+    getValue("countyMedical")
+  );
+
+  addRow(
+    "County Dental Contribution",
+    getValue("countyDental")
+  );
+
+  addRow(
+    "County HSA Base Funding",
+    getValue("countyHsaBase")
+  );
+
+  addRow(
+    "County HSA Matching Contribution",
+    getValue("countyHsaMatch")
+  );
+
+  addRow(
+    "County 401(a) Retirement Matching",
+    getValue("countyRetMatch")
+  );
+
+  addRow(
+    "Total Estimated County Contributions",
+    getValue("countyTotal"),
+    true
+  );
+
+  addNote(
+    "Benefit and retirement amounts reflect the employee's " +
+    "selected elections and the calculator's regular-pay assumptions. " +
+    "They are provided for reference and have not been adjusted " +
+    "or validated for this specific paycheck."
+  );
+
+  addNote(
+    "Estimated take-home pay is not yet available for specific " +
+    "paycheck calculations. Actual deductions may vary based on " +
+    "eligible earnings, benefit elections, and payroll rules."
+  );
+
+}else{
+
+    addRow(
+      "Selected Healthcare and Retirement Deductions",
+      getValue("takeHomeDeductions")
+    );
+
+    addRow(
+      "Entered Federal and Virginia Income Tax Withholding",
+      getValue("takeHomeIncomeTax")
+    );
+
+    addRow(
+      "Estimated Employee Social Security and Medicare",
+      getValue("takeHomeFica")
+    );
+
+    addRow(
+      "Estimated Take-Home Pay Per Paycheck",
+      getValue("takeHomePay"),
+      true
+    );
+  }
+
+// Keep the Important Information heading and notice together.
+checkPage(105);
+
+addHeading("Important Information");
+
+  addNote(
+    "This statement is for informational planning purposes " +
+    "only and does not replace official County payroll " +
+    "records available through MyJCC. Federal and Virginia " +
+    "income tax withholding amounts are entered manually. " +
+    "Social Security and Medicare estimates use applicable " +
+    "rates, wage limits, and assumed pretax benefit deductions. " +
+    "Actual compensation, deductions, and payroll tax amounts " +
+    "may differ. Benefit tax treatment remains subject to " +
+    "Payroll validation."
+  );
+
+  // Footer on every page
+  const pageCount=doc.getNumberOfPages();
+
+  for(let page=1;page<=pageCount;page++){
+    doc.setPage(page);
+
+    doc.setDrawColor(200,215,225);
+    doc.line(
+      margin,pageHeight-48,
+      pageWidth-margin,pageHeight-48
+    );
+
+    doc.setFont("helvetica","normal");
+    doc.setFontSize(8);
+    doc.setTextColor(100,110,120);
+
+    doc.text(
+      "James City County | Informational Estimate",
+      margin,pageHeight-34
+    );
+
+    doc.text(
+      `Page ${page} of ${pageCount}`,
+      pageWidth-margin,
+      pageHeight-34,
+      {align:"right"}
+    );
+  }
+
+  doc.save(
+    "JCC_Interactive_Benefits_Calculator_Summary.pdf"
+  );
+}
+
 document.addEventListener("DOMContentLoaded",()=>{
   buildNav();
   document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>showPanel(t.dataset.panel)));

@@ -14,7 +14,7 @@
     <img class="logo" src="images/jcc-logo.jpg" alt="James City County logo">
     <div>
       <h1>Interactive Benefits Calculator</h1>
-      <div class="tagline">Discover the full value of your James City County Benefit Package</div>
+      <div class="tagline">Discover the value of your James City County Benefit Package</div>
     </div>
   </div>
 </header>
@@ -97,16 +97,131 @@
             <label for="annualSalary">Annual Salary</label>
             <input id="annualSalary" type="number" min="0" step="100" value="55000">
           </div>
-          <div id="hourlyBox" class="hidden">
-            <div class="two">
-              <div><label for="hourlyRate">Hourly Rate</label><input id="hourlyRate" type="number" min="0" step=".01" value="26.44"></div>
-              <div><label for="hoursWeek">Hours Per Week</label><input id="hoursWeek" type="number" min="1" step=".25" value="40"></div>
-            </div>
-          </div>
-          <div class="three">
+          
+<div id="hourlyBox" class="hidden">
+
+  <div class="two">
+    <div>
+      <label for="hourlyRate">Hourly Rate</label>
+      <input id="hourlyRate" type="number" min="0" step=".01" value="26.44">
+    </div>
+  </div>
+
+  <p class="small">Choose how you would like to estimate your paycheck.</p>
+
+  <div class="two">
+    <label>
+      <input type="radio" name="hourlyEstimateMode" value="average" checked style="width:auto">
+      Average Paycheck Estimate
+    </label>
+    <label>
+      <input type="radio" name="hourlyEstimateMode" value="specific" style="width:auto">
+      Specific Paycheck Estimate
+    </label>
+  </div>
+
+  
+<div id="averageHoursBox">
+
+  <div class="two">
+    <div>
+      <label for="hoursWeek">Average Regular Hours Per Week</label>
+      <input id="hoursWeek" type="number" min="0" step=".25" value="40">
+    </div>
+
+    <div>
+      <label for="averageOvertimeHours">Average Qualifying Overtime Hours Per Week</label>
+      <input id="averageOvertimeHours" type="number" min="0" step=".25" value="0">
+    </div>
+  </div>
+
+  <p class="small">
+    Enter your estimated regular and qualifying overtime hours per week.
+    Overtime is calculated at 1.5 times your regular hourly rate.
+  </p>
+
+  <div class="kpi">
+    <span>Estimated Average Regular Gross Per Paycheck</span>
+    <strong id="averageRegularGross">$0.00</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Calculated Overtime Hourly Rate</span>
+    <strong id="averageOvertimeRate">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Estimated Average Overtime Gross Per Paycheck</span>
+    <strong id="averageOvertimeGross">$0.00</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Total Estimated Average Gross Per Paycheck</span>
+    <strong id="averageTotalGross">$0.00</strong>
+  </div>
+
+  <p class="small">
+    This estimate assumes the entered average weekly hours continue
+    throughout the year. Overtime earnings are shown separately and
+    are not yet included in the existing benefits and retirement calculations.
+  </p>
+
+</div>
+
+
+  <div id="specificPaycheckBox" class="hidden">
+    <div class="two">
+      <div>
+        <label for="specificRegularHours">Regular Paid Hours</label>
+        <input id="specificRegularHours" type="number" min="0" step=".25" value="80">
+      </div>
+
+      <div>
+        <label for="specificOvertimeHours">Qualifying Overtime Hours</label>
+        <input id="specificOvertimeHours" type="number" min="0" step=".25" value="0">
+      </div>
+    </div>
+
+    <p class="small">
+      Overtime earnings will be estimated at 1.5 times the regular hourly rate.
+      Enter only hours that qualify for overtime under County policy.
+    </p>
+
+
+<div class="kpi">
+  <span>Estimated Regular Gross Earnings</span>
+  <strong id="specificRegularGross">$0.00</strong>
+</div>
+
+<div class="kpi">
+  <span>Calculated Overtime Hourly Rate</span>
+  <strong id="specificOvertimeRate">—</strong>
+</div>
+
+<div class="kpi">
+  <span>Estimated Overtime Gross Earnings</span>
+  <strong id="specificOvertimeGross">$0.00</strong>
+</div>
+
+<div class="kpi">
+  <span>Total Estimated Gross Earnings for This Paycheck</span>
+  <strong id="specificGrossPreview">$0.00</strong>
+</div>
+
+<p class="small">
+  This specific-paycheck estimate is currently a preview.
+  Benefits and retirement calculations continue to use
+  average annualized earnings until paycheck-specific
+  deductions are integrated.
+</p>
+  </div>
+
+</div>
+
+          <div class="three" id="annualPaySummary">
             <div><label>Pay Periods Per Year</label><input value="24" readonly></div>
             <div><label>Annual Hours</label><input id="annualHours" readonly></div>
-            <div><label>Gross Per Pay Period</label><input id="grossPerPayInput" readonly></div>
+            <div><label>Base Gross Per Pay Period</label><input id="grossPerPayInput" readonly></div>
           </div>
         </div>
 
@@ -458,12 +573,214 @@
     <div class="section-heading"><div class="section-icon" aria-hidden="true">🧾</div><h2>Paycheck Impact</h2></div>
     <div class="grid">
       <div class="card green">
+
+<div id="impactHourlyEarnings" class="hidden">
+
+  <h3>Hourly Earnings Breakdown</h3>
+
+  <p class="small" id="impactHourlyEstimateType"></p>
+
+  <div class="kpi">
+    <span>Estimated Regular Gross Earnings</span>
+    <strong id="impactHourlyRegular">$0.00</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Estimated Overtime Gross Earnings</span>
+    <strong id="impactHourlyOvertime">$0.00</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Total Estimated Gross Earnings</span>
+    <strong id="impactHourlyTotal">$0.00</strong>
+  </div>
+
+  <p class="small">
+    This earnings breakdown is a preview. The benefit and
+    retirement deductions shown below currently use estimated
+    base earnings. Overtime has not yet been incorporated
+    into the paycheck deduction calculations.
+  </p>
+
+</div>
+
         <h3>Estimated Pay Before Taxes <span class="badge">Planning estimate</span></h3>
-        <div class="kpi"><span>Gross pay per pay period</span><strong id="impactGross">$0.00</strong></div>
+        <div class="kpi"><span>Base gross pay per pay period</span><strong id="impactGross">$0.00</strong></div>
         <div class="kpi"><span>Healthcare elections</span><strong id="impactBenefits">$0.00</strong></div>
         <div class="kpi"><span>Retirement deductions</span><strong id="impactRetirement">$0.00</strong></div>
         <div class="kpi"><span>Total deductions</span><strong id="impactTotalDeductions">$0.00</strong></div>
         <div class="kpi"><span>Estimated pay before taxes</span><strong id="impactAfter">$0.00</strong></div>
+
+<div id="manualTaxWithholding">
+
+  <h3>Income Tax Withholding Estimates</h3>
+
+  <p class="small">
+    Enter your estimated federal and Virginia income tax
+    withholding amounts per paycheck. Current employees may reference their most recent pay stub in MyJCC.
+  </p>
+
+  <div class="two">
+
+    <div>
+      <label for="federalWithholdingPerPay">
+        Federal Income Tax Withholding Per Paycheck
+      </label>
+      <input
+        id="federalWithholdingPerPay"
+        type="number"
+        min="0"
+        step=".01"
+        value="0.00">
+    </div>
+
+    <div>
+      <label for="virginiaWithholdingPerPay">
+        Virginia Income Tax Withholding Per Paycheck
+      </label>
+      <input
+        id="virginiaWithholdingPerPay"
+        type="number"
+        min="0"
+        step=".01"
+        value="0.00">
+    </div>
+
+  </div>
+
+  <div class="kpi">
+    <span>Total Entered Income Tax Withholding Per Paycheck</span>
+    <strong id="manualIncomeTaxTotal">$0.00</strong>
+  </div>
+
+  <p class="small">
+    These amounts are entered manually and will not
+    automatically change when salary, hours, or benefit
+    elections change. A zero entry does not necessarily
+    mean no income tax is owed. Social Security and
+    Medicare estimates will be added separately.
+  </p>
+
+</div>
+
+<div id="ficaEstimates">
+
+  <h3>Estimated Social Security and Medicare Taxes</h3>
+
+  <p class="small">
+    These estimates will be calculated automatically using
+    applicable FICA-taxable wages and payroll tax rules.
+  </p>
+
+  <div class="two">
+    <div>
+      <label for="ficaTaxYear">Tax Calendar Year</label>
+      <select id="ficaTaxYear">
+        <option value="2026" selected>2026</option>
+        <option value="2027">2027</option>
+      </select>
+    </div>
+  </div>
+
+<div class="two">
+
+  <div>
+    <label for="ytdSocialSecurityWages">
+      Social Security Taxable Wages YTD
+    </label>
+    <input
+      id="ytdSocialSecurityWages"
+      type="number"
+      min="0"
+      step=".01"
+      value="0.00">
+  </div>
+
+  <div>
+    <label for="ytdMedicareWages">
+      Medicare Taxable Wages YTD
+    </label>
+    <input
+      id="ytdMedicareWages"
+      type="number"
+      min="0"
+      step=".01"
+      value="0.00">
+  </div>
+
+</div>
+
+<p class="small">
+  Enter year-to-date taxable wages before the paycheck being
+  estimated. Current employees may reference their payroll information in MyJCC.
+  Leave these fields at zero when estimating the first paycheck
+  of the calendar year or when no prior taxable wages apply.
+</p>
+
+<div class="kpi">
+  <span>Estimated FICA-Taxable Wages Per Paycheck</span>
+  <strong id="ficaTaxableWagesPerPay">—</strong>
+</div>
+
+  <div class="kpi">
+    <span>Employee Social Security (6.2%)</span>
+    <strong id="employeeSocialSecurity">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Employee Medicare (1.45%)</span>
+    <strong id="employeeMedicare">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Additional Medicare Tax, if applicable (0.9%)</span>
+    <strong id="employeeAdditionalMedicare">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Total Estimated Employee FICA Taxes</span>
+    <strong id="employeeFicaTotal">—</strong>
+  </div>
+
+<div id="takeHomeEstimate">
+
+  <h3>Estimated Take-Home Pay</h3>
+
+  <div class="kpi">
+    <span>Estimated Gross Earnings Per Paycheck</span>
+    <strong id="takeHomeGross">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Selected Healthcare and Retirement Deductions</span>
+    <strong id="takeHomeDeductions">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Entered Federal and Virginia Income Tax Withholding</span>
+    <strong id="takeHomeIncomeTax">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Estimated Employee Social Security and Medicare Taxes</span>
+    <strong id="takeHomeFica">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Estimated Take-Home Pay Per Paycheck</span>
+    <strong id="takeHomePay">—</strong>
+  </div>
+
+  <p class="small" id="takeHomeNote">
+    This is an informational paycheck estimate. Actual pay
+    may differ due to withholding elections, payroll adjustments,
+    other deductions, and applicable earnings rules.
+  </p>
+
+</div>
+
+</div>
+
       </div>
       <aside>
         <div class="card blue">
@@ -474,14 +791,167 @@
           <div class="kpi"><span>HSA match per pay</span><strong id="countyHsaMatch">$0.00</strong></div>
           <div class="kpi"><span>401(a) match per pay</span><strong id="countyRetMatch">$0.00</strong></div>
           <div class="kpi"><span>Total estimated County contribution per pay</span><strong id="countyTotal">$0.00</strong></div>
+
+<h3>County-Paid Payroll Taxes</h3>
+
+<div class="kpi">
+  <span>County Social Security (6.2%)</span>
+  <strong id="countySocialSecurity">—</strong>
+</div>
+
+<div class="kpi">
+  <span>County Medicare (1.45%)</span>
+  <strong id="countyMedicare">—</strong>
+</div>
+
+<div class="kpi">
+  <span>Total Estimated County FICA Taxes</span>
+  <strong id="countyFicaTotal">—</strong>
+</div>
+
+<p class="small">
+  Employer-paid payroll taxes are separate from the
+  County's benefit contributions and do not represent
+  additional cash compensation to the employee.
+</p>
+
         </div>
-        <div class="callout warning">This is not a net pay calculator. Taxes, FICA, and optional deductions are not included in this tool. Garnishments, and other payroll items are also excluded.</div>
+        
+
+
+<div class="callout warning">
+
+  <h3>Important Information About Your Paycheck Estimate</h3>
+
+  <ul class="callout-list">
+    <li>
+      <strong>For planning purposes only:</strong>
+      This calculator provides estimates and does not replace
+      official County payroll information available through MyJCC.
+    </li>
+
+    <li>
+      <strong>Income tax withholding:</strong>
+      Federal and Virginia income tax amounts are entered by the
+      employee and do not automatically adjust when pay or
+      benefit elections change.
+    </li>
+
+    <li>
+      <strong>Social Security and Medicare:</strong>
+      These taxes are estimated automatically using applicable
+      tax rates, wage limits, and assumed pretax deductions.
+    </li>
+
+    <li>
+      <strong>Take-home pay estimates:</strong>
+      Available for annual salary and average hourly paycheck
+      calculations. Specific paycheck take-home estimates
+      are not currently available.
+    </li>
+
+    <li>
+      <strong>Actual paycheck amounts may vary:</strong>
+      Differences may result from tax elections, benefit
+      deductions, overtime, garnishments, or other
+      payroll adjustments.
+    </li>
+  </ul>
+
+</div>
+
+
+
       </aside>
     </div>
   </section>
 
   <section id="summary" class="panel">
     <div class="section-heading"><div class="section-icon" aria-hidden="true">📋</div><h2>Summary</h2></div>
+
+<div class="card blue" id="annualRewardsSummary">
+
+  <h3>Your Estimated Total Annual Compensation &amp; Benefits</h3>
+
+  <p class="small">
+    Discover the estimated combined value of your annual gross
+    earnings and the County's contributions toward your selected
+    benefits and retirement plans.
+  </p>
+
+  <div class="kpi">
+    <span>Annual Base Gross Earnings</span>
+    <strong id="rewardsBaseAnnual">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Projected Annual Overtime Earnings</span>
+    <strong id="rewardsOvertimeAnnual">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Total Estimated Annual Gross Earnings</span>
+    <strong id="rewardsGrossAnnual">—</strong>
+  </div>
+
+  <h3>Annual County Benefit Contributions</h3>
+
+  <div class="kpi">
+    <span>County-Paid Healthcare and Other Selected Benefits</span>
+    <strong id="rewardsBenefitsAnnual">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>County Retirement Contributions and Matching</span>
+    <strong id="rewardsRetirementAnnual">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Total Annual County Benefit and Retirement Contributions</span>
+    <strong id="rewardsCountyBenefitsAnnual">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Combined Annual Compensation and Benefits</span>
+    <strong id="rewardsTotalAnnual">—</strong>
+  </div>
+
+  <p class="small">
+    This estimate includes the County-paid benefits and
+    retirement contributions calculated by this tool.
+    It may not include every benefit or employment expense.
+    Annual overtime projections are based on average weekly
+    earnings rather than a single paycheck.
+  </p>
+
+  <h3>Additional County-Paid Payroll Taxes</h3>
+
+  <div class="kpi">
+    <span>Estimated Annual County Social Security and Medicare</span>
+    <strong id="rewardsCountyFicaAnnual">—</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Estimated Total Annual County Employment Investment</span>
+    <strong id="rewardsInvestmentAnnual">—</strong>
+  </div>
+
+  <p class="small">
+    
+<p class="small">
+  Employer-paid Social Security and Medicare taxes are
+  additional County employment expenses and are not
+  employee compensation or benefits. These preliminary
+  annual estimates use projected earnings and assumed
+  pretax deductions for the selected calendar tax year.
+  Actual County payroll tax expenses may differ.
+  Benefit tax treatment remains subject to Payroll validation.
+</p>
+
+  </p>
+
+</div>
+
     <div class="card green">
       <div class="kpi"><span>Annual gross pay</span><strong id="sumAnnual">$0.00</strong></div>
       <div class="kpi"><span>Future increase percentage</span><strong id="sumFuturePct">0.00%</strong></div>
@@ -605,7 +1075,7 @@
     <span><em>We work in partnership with all citizens to achieve a quality community.</em></span>
   </div>
 </footer>
-
+<script src="js/county-logo.js"></script>
 <script src="js/calculator.js" defer></script>
 
 </body>
