@@ -51,13 +51,15 @@
     taxes, retirement contributions, or benefit eligibility.
   </li>
 
-  <li>
-    <strong>Informational and unbiased:</strong>
-    The tool provides factual benefit information to help
-    employees understand available options and potential costs.
-    It does not recommend a benefit plan, contribution amount,
-    or enrollment election.
-  </li>
+  
+<li>
+  <strong>Informational only:</strong>
+  The tool provides benefit information to help
+  employees understand available options and potential
+  costs. It does not recommend a benefit plan,
+  contribution amount, or enrollment election.
+</li>
+
 
   <li>
     <strong>Actual amounts may differ:</strong>
@@ -65,13 +67,13 @@
     contributions may differ from actual amounts.
   </li>
 
-  <li>
-    <strong>Official information:</strong>
-    Employees should review official County benefit plan
-    documents and payroll information available through MyJCC
-    and consult appropriate advisors when making personal
-    financial or benefit decisions.
-  </li>
+  
+<li>
+  <strong>Official information:</strong>
+  Employees should review official County benefit plan
+  documents and payroll information available through MyJCC.
+</li>
+
 
 </ul>
 
@@ -171,47 +173,50 @@
     </div>
   </div>
 
-  <p class="small">Choose how you would like to estimate your paycheck.</p>
-
-  <div class="two">
-    <label>
-      <input type="radio" name="hourlyEstimateMode" value="average" checked style="width:auto">
-      Average Paycheck Estimate
-    </label>
-    <label>
-      <input type="radio" name="hourlyEstimateMode" value="specific" style="width:auto">
-      Specific Paycheck Estimate
-    </label>
-  </div>
-
   
+
 <div id="averageHoursBox">
 
   <div class="two">
+
     <div>
-      <label for="hoursWeek">Average Regular Hours Per Week</label>
-      <input id="hoursWeek" type="number" min="0" step=".25" value="40">
+      <label for="hoursWeek">
+        Average Regular Hours Per Week
+      </label>
+      <input
+        id="hoursWeek"
+        type="number"
+        min="0"
+        step=".25"
+        value="40"
+      >
     </div>
 
     <div>
-      <label for="averageOvertimeHours">Average Qualifying Overtime Hours Per Week</label>
-      <input id="averageOvertimeHours" type="number" min="0" step=".25" value="0">
+      <label for="averageOvertimePay">
+        Average Dollar Amount of Qualifying Overtime Pay Per Week
+      </label>
+      <input
+        id="averageOvertimePay"
+        type="number"
+        min="0"
+        step=".01"
+        value="0"
+        inputmode="decimal"
+      >
     </div>
+
   </div>
 
   <p class="small">
-    Enter your estimated regular and qualifying overtime hours per week.
-    Overtime is calculated at 1.5 times your regular hourly rate.
+    Enter your estimated average regular hours per week
+    and the average dollar amount of qualifying overtime
+    earnings per week.
   </p>
 
   <div class="kpi">
     <span>Estimated Average Regular Gross Per Paycheck</span>
     <strong id="averageRegularGross">$0.00</strong>
-  </div>
-
-  <div class="kpi">
-    <span>Calculated Overtime Hourly Rate</span>
-    <strong id="averageOvertimeRate">—</strong>
   </div>
 
   <div class="kpi">
@@ -225,68 +230,18 @@
   </div>
 
   <p class="small">
-    This estimate assumes the entered average weekly hours continue
-    throughout the year. Overtime earnings are shown separately and
-    are not yet included in the existing benefits and retirement calculations.
+    This estimate assumes the entered average weekly hours
+    continue throughout the year. Overtime earnings are
+    shown separately and are not included in the existing
+    benefits and retirement calculations.
   </p>
 
 </div>
 
 
-  <div id="specificPaycheckBox" class="hidden">
-    <div class="two">
-      <div>
-        <label for="specificRegularHours">Regular Paid Hours</label>
-        <input id="specificRegularHours" type="number" min="0" step=".25" value="80">
-      </div>
-
-      <div>
-        <label for="specificOvertimeHours">Qualifying Overtime Hours</label>
-        <input id="specificOvertimeHours" type="number" min="0" step=".25" value="0">
-      </div>
-    </div>
-
-    <p class="small">
-      Overtime earnings will be estimated at 1.5 times the regular hourly rate.
-      Enter only hours that qualify for overtime under County policy.
-    </p>
-
-
-<div class="kpi">
-  <span>Estimated Regular Gross Earnings</span>
-  <strong id="specificRegularGross">$0.00</strong>
-</div>
-
-<div class="kpi">
-  <span>Calculated Overtime Hourly Rate</span>
-  <strong id="specificOvertimeRate">—</strong>
-</div>
-
-<div class="kpi">
-  <span>Estimated Overtime Gross Earnings</span>
-  <strong id="specificOvertimeGross">$0.00</strong>
-</div>
-
-<div class="kpi">
-  <span>Total Estimated Gross Earnings for This Paycheck</span>
-  <strong id="specificGrossPreview">$0.00</strong>
-</div>
-
-<p class="small">
-  This specific-paycheck estimate is currently a preview.
-  Benefits and retirement calculations continue to use
-  average annualized earnings until paycheck-specific
-  deductions are integrated.
-</p>
   </div>
 
-</div>
-
-          <div class="three" id="annualPaySummary">
-            <div><label>Pay Periods Per Year</label><input value="24" readonly></div>
-            <div><label>Annual Hours</label><input id="annualHours" readonly></div>
-            <div><label>Base Gross Per Pay Period</label><input id="grossPerPayInput" readonly></div>
-          </div>
+         
         </div>
 
 
@@ -659,21 +614,24 @@
     <strong id="impactHourlyTotal">$0.00</strong>
   </div>
 
-  <p class="small">
-    This earnings breakdown is a preview. The benefit and
-    retirement deductions shown below currently use estimated
-    base earnings. Overtime has not yet been incorporated
-    into the paycheck deduction calculations.
-  </p>
+  
+<p class="small">
+  This estimate includes projected regular and overtime
+  earnings. Healthcare and retirement deductions are
+  calculated using estimated base earnings only.
+  Overtime earnings are included in the estimated
+  Social Security, Medicare, and take-home pay calculations.
+</p>
+
 
 </div>
 
-        <h3>Estimated Pay Before Taxes <span class="badge">Planning estimate</span></h3>
+        <h3>Base Pay and Selected Deductions<span class="badge">Planning estimate</span></h3>
         <div class="kpi"><span>Base gross pay per pay period</span><strong id="impactGross">$0.00</strong></div>
         <div class="kpi"><span>Healthcare elections</span><strong id="impactBenefits">$0.00</strong></div>
         <div class="kpi"><span>Retirement deductions</span><strong id="impactRetirement">$0.00</strong></div>
         <div class="kpi"><span>Total deductions</span><strong id="impactTotalDeductions">$0.00</strong></div>
-        <div class="kpi"><span>Estimated pay before taxes</span><strong id="impactAfter">$0.00</strong></div>
+        <div class="kpi"><span>Estimated base pay after deductions (before taxes)</span><strong id="impactAfter">$0.00</strong></div>
 
 <div id="manualTaxWithholding">
 
@@ -731,55 +689,13 @@
 
   <h3>Estimated Social Security and Medicare Taxes</h3>
 
-  <p class="small">
-    These estimates will be calculated automatically using
-    applicable FICA-taxable wages and payroll tax rules.
-  </p>
-
-  <div class="two">
-    <div>
-      <label for="ficaTaxYear">Tax Calendar Year</label>
-      <select id="ficaTaxYear">
-        <option value="2026" selected>2026</option>
-        <option value="2027">2027</option>
-      </select>
-    </div>
-  </div>
-
-<div class="two">
-
-  <div>
-    <label for="ytdSocialSecurityWages">
-      Social Security Taxable Wages YTD
-    </label>
-    <input
-      id="ytdSocialSecurityWages"
-      type="number"
-      min="0"
-      step=".01"
-      value="0.00">
-  </div>
-
-  <div>
-    <label for="ytdMedicareWages">
-      Medicare Taxable Wages YTD
-    </label>
-    <input
-      id="ytdMedicareWages"
-      type="number"
-      min="0"
-      step=".01"
-      value="0.00">
-  </div>
-
-</div>
-
+ 
 <p class="small">
-  Enter year-to-date taxable wages before the paycheck being
-  estimated. Current employees may reference their payroll information in MyJCC.
-  Leave these fields at zero when estimating the first paycheck
-  of the calendar year or when no prior taxable wages apply.
+  These estimates will be calculated automatically using
+  applicable FICA-taxable wages, payroll tax rules, and
+  the salary information you provided on the salary/hourly tab.
 </p>
+
 
 <div class="kpi">
   <span>Estimated FICA-Taxable Wages Per Paycheck</span>
@@ -806,6 +722,8 @@
     <strong id="employeeFicaTotal">—</strong>
   </div>
 
+</div>
+
 <div id="takeHomeEstimate">
 
   <h3>Estimated Take-Home Pay</h3>
@@ -830,10 +748,12 @@
     <strong id="takeHomeFica">—</strong>
   </div>
 
-  <div class="kpi">
-    <span>Estimated Take-Home Pay Per Paycheck</span>
-    <strong id="takeHomePay">—</strong>
-  </div>
+  
+<div class="kpi take-home-total">
+  <span>Estimated Take-Home Pay Per Paycheck</span>
+  <strong id="takeHomePay">—</strong>
+</div>
+
 
   <p class="small" id="takeHomeNote">
     This is an informational paycheck estimate. Actual pay
@@ -845,12 +765,12 @@
 
 </div>
 
-      </div>
+      
       <aside>
         <div class="card blue">
           <h3>County Contributions <span class="badge">Employer-paid value</span></h3>
-          <div class="kpi"><span>Medical contribution per pay</span><strong id="countyMedical">$0.00</strong></div>
-          <div class="kpi"><span>Dental contribution per pay</span><strong id="countyDental">$0.00</strong></div>
+          <div class="kpi"><span>Average estimated medical contribution per pay</span><strong id="countyMedical">$0.00</strong></div>
+          <div class="kpi"><span>Average estimated dental contribution per pay</span><strong id="countyDental">$0.00</strong></div>
           <div class="kpi"><span>HSA base funding per pay</span><strong id="countyHsaBase">$0.00</strong></div>
           <div class="kpi"><span>HSA match per pay</span><strong id="countyHsaMatch">$0.00</strong></div>
           <div class="kpi"><span>401(a) match per pay</span><strong id="countyRetMatch">$0.00</strong></div>
@@ -882,7 +802,8 @@
         </div>
         
 
-
+      </aside>
+    </div>
 <div class="callout warning">
 
   <h3>Important Information About Your Paycheck Estimate</h3>
@@ -907,12 +828,16 @@
       tax rates, wage limits, and assumed pretax deductions.
     </li>
 
-    <li>
-      <strong>Take-home pay estimates:</strong>
-      Available for annual salary and average hourly paycheck
-      calculations. Specific paycheck take-home estimates
-      are not currently available.
-    </li>
+    
+<li>
+  <strong>Take-home pay estimates:</strong>
+  Estimated take-home pay is available for annual salary
+  and hourly pay calculations. Estimates reflect selected
+  benefit and retirement deductions, manually entered
+  income tax withholding, and estimated Social Security
+  and Medicare taxes.
+</li>
+
 
     <li>
       <strong>Actual paycheck amounts may vary:</strong>
@@ -924,10 +849,6 @@
 
 </div>
 
-
-
-      </aside>
-    </div>
   </section>
 
   <section id="summary" class="panel">
@@ -975,7 +896,7 @@
     <strong id="rewardsCountyBenefitsAnnual">—</strong>
   </div>
 
-  <div class="kpi">
+  <div class="kpi compensation-total">
     <span>Combined Annual Compensation and Benefits</span>
     <strong id="rewardsTotalAnnual">—</strong>
   </div>
@@ -995,20 +916,24 @@
     <strong id="rewardsCountyFicaAnnual">—</strong>
   </div>
 
-  <div class="kpi">
-    <span>Estimated Total Annual County Employment Investment</span>
-    <strong id="rewardsInvestmentAnnual">—</strong>
-  </div>
+  
+<div class="kpi investment-total">
+  <span>Estimated Total Annual County Employment Investment</span>
+  <strong id="rewardsInvestmentAnnual">—</strong>
+</div>
+
 
   <p class="small">
     
+
 <p class="small">
   Employer-paid Social Security and Medicare taxes are
   additional County employment expenses and are not
-  employee compensation or benefits. These preliminary
-  annual estimates use projected earnings and assumed
-  pretax deductions for the selected calendar tax year.
-  Actual County payroll tax expenses may differ.
+  employee compensation or benefits. These annual estimates
+  are calculated using projected earnings, applicable payroll
+  tax rates, wage limits, and assumed pretax benefit deductions.
+  Actual County payroll tax expenses may differ based on
+  payroll records and applicable tax rules.
   Benefit tax treatment remains subject to Payroll validation.
 </p>
 

@@ -34,54 +34,72 @@ function num(id){const n=parseFloat(el(id)?.value);return Number.isFinite(n)?n:0
 function val(id){return el(id)?.value||""}
 function money(n){return (Number.isFinite(n)?n:0).toLocaleString("en-US",{style:"currency",currency:"USD"})}
 
-function estimateFica(taxableWages, ytdSSWages, ytdMedicareWages, taxYear) {
+
+function estimateFica(taxableWages) {
+
+  // Automatically use the current calendar year's
+  // Social Security taxable wage limit.
+  const taxYear = new Date().getFullYear();
 
   const socialSecurityLimits = {
-    "2026": 184500,
-    "2027": 192300
+    2026: 184500,
+    2027: 192300
   };
 
-  const annualLimit = socialSecurityLimits[String(taxYear)];
+  const annualLimit = socialSecurityLimits[taxYear];
 
+  // Do not estimate using an unverified future wage limit.
   if (annualLimit === undefined) return null;
-
-  const wages = Math.round(Math.max(0, Number(taxableWages) || 0) * 100) / 100;
-  const previousSS = Math.max(0, Number(ytdSSWages) || 0);
-  const previousMedicare = Math.max(0, Number(ytdMedicareWages) || 0);
 
   const roundCents = amount =>
     Math.round((amount + Number.EPSILON) * 100) / 100;
 
-  // Social Security is subject to the annual wage limit.
-  const ssTaxableWages = Math.min(
-    wages,
-    Math.max(0, annualLimit - previousSS)
+  // Estimated taxable wages for an average paycheck.
+  const wages = roundCents(
+    Math.max(0, Number(taxableWages) || 0)
   );
 
-  // Additional Medicare starts when calendar-year
-  // Medicare wages paid by the employer exceed $200,000.
-  const additionalMedicareWages = Math.min(
-    wages,
-    Math.max(0, previousMedicare + wages - 200000)
+  // Project annual taxable earnings over 24 pay periods.
+  const annualWages = wages * PAY_PERIODS;
+
+  // Average Social Security tax per paycheck,
+  // accounting for the annual wage limit.
+  const socialSecurity = roundCents(
+    Math.min(annualWages, annualLimit) *
+    0.062 / PAY_PERIODS
   );
 
-  const socialSecurity = roundCents(ssTaxableWages * 0.062);
-  const medicare = roundCents(wages * 0.0145);
-  const additionalMedicare = roundCents(additionalMedicareWages * 0.009);
+  // Medicare applies to all FICA-taxable earnings.
+  const medicare = roundCents(
+    annualWages * 0.0145 / PAY_PERIODS
+  );
+
+  // Estimated average Additional Medicare Tax.
+  // Actual withholding begins after wages paid
+  // by the employer exceed $200,000 in the year.
+  const additionalMedicare = roundCents(
+    Math.max(0, annualWages - 200000) *
+    0.009 / PAY_PERIODS
+  );
 
   return {
     employeeSocialSecurity: socialSecurity,
     employeeMedicare: medicare,
     employeeAdditionalMedicare: additionalMedicare,
+
     employeeFicaTotal: roundCents(
       socialSecurity + medicare + additionalMedicare
     ),
 
     countySocialSecurity: socialSecurity,
     countyMedicare: medicare,
-    countyFicaTotal: roundCents(socialSecurity + medicare)
+
+    countyFicaTotal: roundCents(
+      socialSecurity + medicare
+    )
   };
 }
+
 
 function text(id,v){if(el(id))el(id).textContent=v}
 function value(id,v){if(el(id))el(id).value=v}
@@ -227,57 +245,32 @@ el("salaryBox").classList.toggle("hidden",mode!=="salary");
 el("hourlyBox").classList.toggle("hidden",mode!=="hourly");
 
 // Show the selected hourly paycheck calculation method
-const hourlyEstimateMode=document.querySelector(
-  'input[name="hourlyEstimateMode"]:checked'
-)?.value||"average";
+
 
 el("averageHoursBox").classList.toggle(
-  "hidden",mode!=="hourly"||hourlyEstimateMode!=="average"
+  "hidden", mode !== "hourly"
 );
 
-el("specificPaycheckBox").classList.toggle(
-  "hidden",mode!=="hourly"||hourlyEstimateMode!=="specific"
-);
-// Display annualized pay information only when appropriate
-el("annualPaySummary").classList.toggle(
-  "hidden",mode==="hourly"&&hourlyEstimateMode==="specific"
-);
-// Calculate estimated earnings for a specific paycheck
+
 const hourlyRate=Math.max(0,num("hourlyRate"));
-const regularHours=Math.max(0,num("specificRegularHours"));
-const overtimeHours=Math.max(0,num("specificOvertimeHours"));
 
-
-const overtimeRate=hourlyRate*1.5;
-
-const regularGross=regularHours*hourlyRate;
-const overtimeGross=overtimeHours*overtimeRate;
-const specificGross=regularGross+overtimeGross;
-
-// Display the specific paycheck earnings breakdown
-text("specificRegularGross",money(regularGross));
-text("specificOvertimeRate",overtimeHours>0 ? money(overtimeRate) : "—");
-text("specificOvertimeGross",money(overtimeGross));
-text("specificGrossPreview",money(specificGross));
 
 // Average paycheck estimate with separate overtime earnings
 const averageRegularHours=Math.max(0,num("hoursWeek"));
-const averageOvertimeHours=Math.max(0,num("averageOvertimeHours"));
+
+const averageOvertimePay=Math.max(0,num("averageOvertimePay"));
 
 const averageRegularGross=
   (hourlyRate*averageRegularHours*52)/PAY_PERIODS;
 
 const averageOvertimeGross=
-  (hourlyRate*1.5*averageOvertimeHours*52)/PAY_PERIODS;
+  (averageOvertimePay*52)/PAY_PERIODS;
+
 
 const averageTotalGross=averageRegularGross+averageOvertimeGross;
 
 text("averageRegularGross",money(averageRegularGross));
 
-text(
-  "averageOvertimeRate",
-  averageOvertimeHours>0 ? money(hourlyRate*1.5) : "—"
-);
 
 text("averageOvertimeGross",money(averageOvertimeGross));
 text("averageTotalGross",money(averageTotalGross));
@@ -285,36 +278,35 @@ text("averageTotalGross",money(averageTotalGross));
 // Preserve existing annualized benefits calculations
 const pay=getPay();
 
+
 const isHourlyEstimate=mode==="hourly";
 
-const isSpecificHourly=
-  isHourlyEstimate&&hourlyEstimateMode==="specific";
 
-// Display hourly earnings breakdown only for hourly employees
+// Display the hourly earnings breakdown
+// only when Hourly Rate is selected.
 el("impactHourlyEarnings").classList.toggle(
   "hidden",!isHourlyEstimate
 );
 
+// All hourly estimates now use average earnings.
 text(
   "impactHourlyEstimateType",
-  isSpecificHourly
-    ? "Specific Paycheck Estimate"
-    : "Average Paycheck Estimate"
+  "Average Paycheck Estimate"
 );
 
 text(
   "impactHourlyRegular",
-  money(isSpecificHourly?regularGross:averageRegularGross)
+  money(averageRegularGross)
 );
 
 text(
   "impactHourlyOvertime",
-  money(isSpecificHourly?overtimeGross:averageOvertimeGross)
+  money(averageOvertimeGross)
 );
 
 text(
   "impactHourlyTotal",
-  money(isSpecificHourly?specificGross:averageTotalGross)
+  money(averageTotalGross)
 );
 
 // Manual federal and Virginia income tax withholding
@@ -325,8 +317,7 @@ const manualIncomeTaxTotal=federalWithholding+virginiaWithholding;
 
 text("manualIncomeTaxTotal",money(manualIncomeTaxTotal));
 
-  value("annualHours",pay.annualHours.toFixed(0));
-  value("grossPerPayInput",money(pay.gross));
+  
   text("grossPerPay",money(pay.gross));text("annualGross",money(pay.annual));text("monthlyGross",money(pay.monthly));text("hourlyEquivalent",money(pay.hourly));
 
   const futurePct=Math.max(0,num("futureIncreasePct"));
@@ -352,12 +343,15 @@ text("manualIncomeTaxTotal",money(manualIncomeTaxTotal));
 
   // Preliminary employee and County FICA estimates
 
-  // Use the selected paycheck's gross earnings.
-  const ficaGross=mode==="hourly"
-    ? (hourlyEstimateMode==="specific"
-        ? specificGross
-        : averageTotalGross)
-    : pay.gross;
+ 
+/* Determine gross earnings for FICA calculations.
+   Hourly employees: regular earnings plus entered overtime pay.
+   Salaried employees: regular gross earnings.
+*/
+const ficaGross=mode==="hourly"
+  ? averageTotalGross
+  : pay.gross;
+
 
   // Assumed FICA-exempt benefit deductions.
   // These classifications must be confirmed with Payroll.
@@ -376,12 +370,7 @@ text("manualIncomeTaxTotal",money(manualIncomeTaxTotal));
     ficaGross-ficaPretaxDeductions
   );
 text("ficaTaxableWagesPerPay",money(ficaTaxableWages));
-  const fica=estimateFica(
-    ficaTaxableWages,
-    num("ytdSocialSecurityWages"),
-    num("ytdMedicareWages"),
-    val("ficaTaxYear")
-  );
+const fica=estimateFica(ficaTaxableWages);
 
   if(fica){
     // Employee payroll taxes
@@ -493,19 +482,17 @@ if(plan==="hybrid"){
   
   // Annual Compensation and Benefits Summary
 
-  const annualRewardsIsSpecific =
-    mode==="hourly" && hourlyEstimateMode==="specific";
+  const annualRewardsIsSpecific=false;
 
   // Base annual earnings exclude projected overtime.
   const annualRewardsBase=pay.annual;
 
   // Project qualifying overtime across 52 weeks.
-  const annualRewardsOvertime=mode==="hourly"
-    ? Math.max(0,num("hourlyRate")) *
-      1.5 *
-      Math.max(0,num("averageOvertimeHours")) *
-      52
-    : 0;
+  
+const annualRewardsOvertime=mode==="hourly"
+  ? Math.max(0,num("averageOvertimePay"))*52
+  : 0;
+
 
   const annualRewardsGross=
     annualRewardsBase+annualRewardsOvertime;
@@ -565,16 +552,18 @@ if(plan==="hybrid"){
 
   // A full-year projection starts with zero prior-year wages.
   // The selected tax year determines the Social Security wage limit.
-  const annualCountyFica=estimateFica(
-    annualFicaTaxableWages,
-    0,
-    0,
-    val("ficaTaxYear")
-  );
+  
+const annualCountyFica=estimateFica(
+  annualFicaTaxableWages / PAY_PERIODS
+);
+
 
   if(!annualRewardsIsSpecific && annualCountyFica){
 
-    const annualCountyFicaTotal=annualCountyFica.countyFicaTotal;
+const annualCountyFicaTotal=Math.round(
+  (annualCountyFica.countyFicaTotal * PAY_PERIODS + Number.EPSILON) * 100
+) / 100;
+
 
     const annualCountyInvestment=
       annualRewardsTotal+annualCountyFicaTotal;
@@ -602,16 +591,17 @@ if(plan==="hybrid"){
   const roundPay = n =>
     Math.round((n + Number.EPSILON) * 100) / 100;
 
-  const takeHomeIsSpecific =
-    mode === "hourly" && hourlyEstimateMode === "specific";
+  
+const takeHomeIsSpecific = false;
 
-  // Salaried employees use regular gross pay.
-  // Hourly average estimates include projected overtime.
-  const estimatedGross = roundPay(
-    mode === "hourly"
-      ? (takeHomeIsSpecific ? specificGross : averageTotalGross)
-      : pay.gross
-  );
+// Salaried employees use regular gross pay.
+// Hourly employees use average regular and overtime earnings.
+const estimatedGross = roundPay(
+  mode === "hourly"
+    ? averageTotalGross
+    : pay.gross
+);
+
 
   text("takeHomeGross", money(estimatedGross));
 
@@ -667,24 +657,15 @@ function reset(){
   value("stdEnroll","no");value("ltdEnroll","no");value("lifeOption","0");value("includeSpouseLife","no");value("includeChildLife","no");value("retirementPlan","hybrid");value("dcPercent","0");value("empowerContribution",0);
   document.querySelectorAll(".benefit-toggle").forEach(x=>x.checked=["medical","dental","vision"].includes(x.value));
 
-// Reset hourly paycheck estimates
-value("averageOvertimeHours", 0);
-value("specificRegularHours", 80);
-value("specificOvertimeHours", 0);
 
-const averageModeRadio = document.querySelector(
-  'input[name="hourlyEstimateMode"][value="average"]'
-);
-if (averageModeRadio) averageModeRadio.checked = true;
+  // Reset average weekly overtime pay
+  value("averageOvertimePay", 0);
+
 
 // Reset manually entered tax withholding
 value("federalWithholdingPerPay", 0);
 value("virginiaWithholdingPerPay", 0);
 
-// Reset FICA information
-value("ficaTaxYear", "2026");
-value("ytdSocialSecurityWages", 0);
-value("ytdMedicareWages", 0);
 
   calculate();showPanel("welcome");
 }
@@ -852,13 +833,9 @@ doc.setFontSize(11);
 doc.setTextColor(70, 80, 90);
 
 
-const isSpecificPaycheckPdf =
-  document.querySelector('input[name="payMode"]:checked')?.value === "hourly" &&
-  document.querySelector('input[name="hourlyEstimateMode"]:checked')?.value === "specific";
 
-const pdfStatementTitle = isSpecificPaycheckPdf
-  ? "Estimated Paycheck & Benefits Statement"
-  : "Estimated Total Compensation & Benefits Statement";
+const pdfStatementTitle = "Estimated Total Compensation & Benefits Statement";
+
 
 doc.text(
   pdfStatementTitle,
@@ -894,16 +871,15 @@ y += 25;
 
 
   // Determine whether annual figures are available.
-  const payMode=document.querySelector(
-    'input[name="payMode"]:checked'
-  )?.value||"salary";
+  
+const payMode=document.querySelector(
+  'input[name="payMode"]:checked'
+)?.value||"salary";
 
-  const hourlyMode=document.querySelector(
-    'input[name="hourlyEstimateMode"]:checked'
-  )?.value||"average";
+// Temporary compatibility variable.
+// Specific Paycheck Estimate has been removed.
+const specificPaycheck=false;
 
-  const specificPaycheck=
-    payMode==="hourly"&&hourlyMode==="specific";
 
 // Show annual compensation sections only when applicable.
 if (!specificPaycheck) {
@@ -1068,10 +1044,23 @@ if(specificPaycheck){
 
 }else{
 
-    addRow(
-      "Selected Healthcare and Retirement Deductions",
-      getValue("takeHomeDeductions")
-    );
+    
+addRow(
+  "Healthcare Deductions Per Paycheck",
+  getValue("sumBenefits")
+);
+
+addRow(
+  "Retirement Deductions Per Paycheck",
+  getValue("sumRetirement")
+);
+
+addRow(
+  "Total Selected Deductions",
+  getValue("takeHomeDeductions"),
+  true
+);
+
 
     addRow(
       "Entered Federal and Virginia Income Tax Withholding",

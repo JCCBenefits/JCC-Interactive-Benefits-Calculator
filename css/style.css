@@ -427,3 +427,89 @@ button.secondary,.link-button.secondary{
 .callout-list li strong {
   color: #0b3557;
 }
+
+/* Highlight the estimated take-home pay result */
+
+#takeHomeEstimate {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid #d5e1ea;
+}
+
+#takeHomeEstimate .take-home-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  background: #eaf5fb;
+  border: 1px solid #bfddec;
+  border-left: 5px solid #0077b6;
+  border-radius: 12px;
+
+  padding: 16px 18px;
+  margin-top: 12px;
+}
+
+#takeHomeEstimate .take-home-total span {
+  font-weight: 700;
+  color: #073b5c;
+}
+
+#takeHomeEstimate .take-home-total strong {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #005580;
+  white-space: nowrap;
+}
+
+/* Annual County employment investment */
+
+.investment-heading {
+  margin-top: 22px;
+  margin-bottom: 10px;
+  font-weight: 700;
+  color: #073b5c;
+}
+
+.investment-total {
+  background: #eaf5fb;
+  border-left: 5px solid #0077b6;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.investment-total strong {
+  font-size: 1.4rem;
+  color: #005580;
+  font-weight: 800;
+}
+
+/* Highlight combined annual compensation and benefits */
+
+.compensation-total {
+  background: #f0f7fb;
+  border-left: 4px solid #6ba9c9;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 12px 0;
+}
+
+.compensation-total span {
+  font-weight: 600;
+  color: #073b5c;
+}
+
+.compensation-total strong {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #005580;
+}
+
+/* Hide Back to Top button on mobile devices */
+@media (max-width: 768px) {
+  #backTop {
+    display: none !important;
+  }
+}
