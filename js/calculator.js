@@ -114,7 +114,9 @@ function ageAsOf(dateString,asOf=planYearDate){
 }
 function getPay(){
   const mode=document.querySelector('input[name="payMode"]:checked')?.value||"salary";
-  const hours=num("hoursWeek")||40;
+  const hours = mode === "salary"
+  ? (num("authorizedWeeklyHours") || 40)
+  : (num("hoursWeek") || 40);
   const annualHours=hours*52;
   let annual=mode==="salary"?num("annualSalary"):num("hourlyRate")*annualHours;
   let hourly=annualHours?annual/annualHours:0;
@@ -269,6 +271,13 @@ const averageOvertimeGross=
 
 const averageTotalGross=averageRegularGross+averageOvertimeGross;
 
+ // Salaried employee overtime estimate
+ // Keep overtime separate from regular base salary.
+ const salaryOvertimeWeekly = Math.max(0, num("salaryOvertimePay"));
+
+ const salaryOvertimeGross =
+   (salaryOvertimeWeekly * 52) / PAY_PERIODS;
+
 text("averageRegularGross",money(averageRegularGross));
 
 
@@ -278,8 +287,27 @@ text("averageTotalGross",money(averageTotalGross));
 // Preserve existing annualized benefits calculations
 const pay=getPay();
 
+const salaryTotalGross=pay.gross+salaryOvertimeGross;
+
 
 const isHourlyEstimate=mode==="hourly";
+
+ // Show the salaried earnings breakdown only when
+ // Annual Salary is selected and overtime is entered.
+ const showSalaryEarnings =
+   mode === "salary" && salaryOvertimeWeekly > 0;
+
+ el("impactSalaryEarnings").classList.toggle(
+   "hidden",
+   !showSalaryEarnings
+ );
+
+ // Display salaried regular and overtime earnings.
+ text("impactSalaryRegular", money(pay.gross));
+
+ text("impactSalaryOvertime", money(salaryOvertimeGross));
+
+ text("impactSalaryTotal", money(salaryTotalGross));
 
 
 // Display the hourly earnings breakdown
@@ -348,9 +376,10 @@ text("manualIncomeTaxTotal",money(manualIncomeTaxTotal));
    Hourly employees: regular earnings plus entered overtime pay.
    Salaried employees: regular gross earnings.
 */
+
 const ficaGross=mode==="hourly"
-  ? averageTotalGross
-  : pay.gross;
+    ? averageTotalGross
+    : salaryTotalGross;
 
 
   // Assumed FICA-exempt benefit deductions.
@@ -489,9 +518,12 @@ if(plan==="hybrid"){
 
   // Project qualifying overtime across 52 weeks.
   
-const annualRewardsOvertime=mode==="hourly"
-  ? Math.max(0,num("averageOvertimePay"))*52
-  : 0;
+
+const annualRewardsOvertime =
+  (mode === "hourly"
+    ? Math.max(0, num("averageOvertimePay"))
+    : Math.max(0, num("salaryOvertimePay"))
+  ) * 52;
 
 
   const annualRewardsGross=
@@ -594,13 +626,14 @@ const annualCountyFicaTotal=Math.round(
   
 const takeHomeIsSpecific = false;
 
-// Salaried employees use regular gross pay.
-// Hourly employees use average regular and overtime earnings.
-const estimatedGross = roundPay(
-  mode === "hourly"
-    ? averageTotalGross
-    : pay.gross
-);
+
+ // Both salaried and hourly estimates include projected overtime.
+ // Healthcare and retirement deductions still use base earnings.
+ const estimatedGross = roundPay(
+   mode === "hourly"
+     ? averageTotalGross
+     : salaryTotalGross
+ );
 
 
   text("takeHomeGross", money(estimatedGross));
@@ -651,7 +684,8 @@ text("impactGross",money(pay.gross));text("impactBenefits",money(c.total));text(
 }
 function reset(){
   document.querySelector('input[name="payMode"][value="salary"]').checked=true;
-  value("annualSalary",55000);value("hourlyRate",26.44);value("hoursWeek",40);value("futureIncreasePct",0);value("dob","");value("tobacco","non");value("coverSpouse","no");value("spouseDob","");
+  value("annualSalary",55000);value("authorizedWeeklyHours",40);value("salaryOvertimePay",0);
+value("hourlyRate",26.44);value("hoursWeek",40);value("futureIncreasePct",0);value("dob","");value("tobacco","non");value("coverSpouse","no");value("spouseDob","");
   value("medicalPlan","hsa");value("medicalCoverage","employee");value("dentalPlan","ppo1");value("dentalCoverage","employee");value("visionCoverage","employee");
   value("hsaEmployeePerPay",0);value("healthFsaAnnual",0);value("limitedFsaAnnual",0);value("dependentFsaAnnual",0);value("ciEmployeeCoverage","0");value("ciSpouseCoverage","0");
   value("stdEnroll","no");value("ltdEnroll","no");value("lifeOption","0");value("includeSpouseLife","no");value("includeChildLife","no");value("retirementPlan","hybrid");value("dcPercent","0");value("empowerContribution",0);
@@ -1084,17 +1118,22 @@ checkPage(105);
 
 addHeading("Important Information");
 
-  addNote(
-    "This statement is for informational planning purposes " +
-    "only and does not replace official County payroll " +
-    "records available through MyJCC. Federal and Virginia " +
-    "income tax withholding amounts are entered manually. " +
-    "Social Security and Medicare estimates use applicable " +
-    "rates, wage limits, and assumed pretax benefit deductions. " +
-    "Actual compensation, deductions, and payroll tax amounts " +
-    "may differ. Benefit tax treatment remains subject to " +
-    "Payroll validation."
-  );
+ 
+addNote(
+  "This statement is for informational planning purposes " +
+  "only and does not replace official County payroll " +
+  "records available through MyJCC. Federal and Virginia " +
+  "income tax withholding amounts are entered manually. " +
+  "Social Security and Medicare estimates use applicable " +
+  "rates, wage limits, and assumed pretax benefit deductions. " +
+  "These estimates do not currently include imputed income " +
+  "from taxable employer-provided benefits. Imputed income " +
+  "is not additional cash received in a paycheck. Actual " +
+  "compensation, taxable wages, deductions, and payroll tax " +
+  "amounts may differ. Benefit tax treatment remains " +
+  "subject to Payroll validation."
+);
+
 
   // Footer on every page
   const pageCount=doc.getNumberOfPages();

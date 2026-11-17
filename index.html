@@ -159,10 +159,66 @@
             <label><input type="radio" name="payMode" value="salary" checked style="width:auto"> Annual salary</label>
             <label><input type="radio" name="payMode" value="hourly" style="width:auto"> Hourly rate</label>
           </div>
-          <div id="salaryBox">
-            <label for="annualSalary">Annual Salary</label>
-            <input id="annualSalary" type="number" min="0" step="100" value="55000">
-          </div>
+          
+<div id="salaryBox">
+
+  <label for="annualSalary">Annual Salary</label>
+  <input
+    id="annualSalary"
+    type="number"
+    min="0"
+    step="100"
+    value="55000"
+  >
+
+  <label for="authorizedWeeklyHours">
+    Authorized Weekly Hours
+  </label>
+
+  <input
+    id="authorizedWeeklyHours"
+    type="number"
+    min="1"
+    step="0.01"
+    value="40"
+  >
+<p class="small">
+    Enter the authorized weekly hours for your position.
+    Most full-time employees have 40 authorized weekly
+    hours. Police Patrol employees generally have 41,
+    and Fire Shift employees have 56.08.
+    This information is used to calculate your hourly
+    equivalent and does not change your regular salary
+    payment.
+  </p>
+
+<label for="salaryOvertimePay">
+  Average Dollar Amount of Qualifying Overtime Pay Per Week
+  (Optional)
+</label>
+
+<input
+  id="salaryOvertimePay"
+  type="number"
+  min="0"
+  step="0.01"
+  value="0"
+  inputmode="decimal"
+>
+
+<p class="small">
+  Enter the estimated average dollar amount of qualifying
+  overtime earnings per week, if applicable.
+  Overtime earnings are estimated separately from regular
+  salary and do not affect the base salary used for
+  healthcare and retirement calculations.
+  Actual overtime payments may vary based on work schedules,
+  County policies, and payroll processing.
+</p>
+
+  
+</div>
+
           
 <div id="hourlyBox" class="hidden">
 
@@ -276,7 +332,8 @@
       </div>
       <aside>
         <div class="card">
-          <h3>Estimated Gross Pay</h3>
+          
+	  <h3>Estimated Base Gross Pay</h3>
           <div class="result" id="grossPerPay">$0.00</div>
           <div class="kpi"><span>Annual gross pay</span><strong id="annualGross">$0.00</strong></div>
           <div class="kpi"><span>Monthly gross pay</span><strong id="monthlyGross">$0.00</strong></div>
@@ -593,6 +650,37 @@
     <div class="grid">
       <div class="card green">
 
+<div id="impactSalaryEarnings" class="hidden">
+
+  <h3>Salaried Earnings Breakdown</h3>
+
+  <p class="small">Average Paycheck Estimate</p>
+
+  <div class="kpi">
+    <span>Estimated Regular Gross Earnings</span>
+    <strong id="impactSalaryRegular">$0.00</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Estimated Overtime Gross Earnings</span>
+    <strong id="impactSalaryOvertime">$0.00</strong>
+  </div>
+
+  <div class="kpi">
+    <span>Total Estimated Gross Earnings</span>
+    <strong id="impactSalaryTotal">$0.00</strong>
+  </div>
+
+  <p class="small">
+    This estimate includes projected regular salary and
+    overtime earnings. Healthcare and retirement deductions
+    are calculated using base salary only. Overtime is
+    included in estimated Social Security, Medicare, and
+    take-home pay calculations.
+  </p>
+
+</div>
+
 <div id="impactHourlyEarnings" class="hidden">
 
   <h3>Hourly Earnings Breakdown</h3>
@@ -641,6 +729,18 @@
     Enter your estimated federal and Virginia income tax
     withholding amounts per paycheck. Current employees may reference their most recent pay stub in MyJCC.
   </p>
+
+
+<p class="small">
+  <strong>Tax Estimate Disclaimer:</strong>
+  These are estimates only. Actual income-tax amounts may
+  vary based on deductions, credits, filing status, and the
+  tax treatment of different income sources. Federal and
+  Virginia income-tax withholding amounts are entered
+  manually and are not automatically calculated by this
+  tool. Social Security and Medicare taxes are estimated
+  separately using applicable payroll tax rules.
+</p>
 
   <div class="two">
 
@@ -828,6 +928,14 @@
       tax rates, wage limits, and assumed pretax deductions.
     </li>
 
+<li>
+  <strong>Imputed income:</strong>
+  Certain employer-provided benefits may increase taxable
+  earnings without increasing cash pay. Imputed income is
+  not currently included in the calculator's automatic
+  Social Security and Medicare estimates. Actual tax
+  withholding may differ.
+</li>
     
 <li>
   <strong>Take-home pay estimates:</strong>
@@ -1053,6 +1161,58 @@
       </p>
     </div>
   </details>
+
+<details>
+  <summary>Understanding Imputed Income</summary>
+
+  <div class="details-body">
+
+    <p>
+      Imputed income represents the taxable value of certain
+      employer-provided benefits that exceed applicable IRS
+      tax-free thresholds or are otherwise considered taxable
+      compensation.
+    </p>
+
+    <p>
+      Examples of employer-provided benefits that may result
+      in imputed income include:
+    </p>
+
+    <ul>
+      <li>Group-term life insurance</li>
+      <li>Tuition assistance</li>
+      <li>Homeownership Assistance Program benefits</li>
+      <li>Free Recreation Center Membership</li>
+      <li>
+        Personal use of County vehicles, including
+        qualifying personal use of take-home vehicles
+      </li>
+    </ul>
+
+    <p>
+      <strong>Important:</strong>
+      Imputed income is not additional cash received in
+      your paycheck. Instead, its taxable value is added
+      to your earnings for applicable tax purposes and
+      may increase the taxes withheld from your paycheck.
+    </p>
+
+    <p>
+      Not all employer-provided benefits are taxable.
+      Tax treatment depends on applicable IRS rules,
+      exclusions, and individual circumstances.
+    </p>
+
+    <p class="small">
+      The Interactive Benefits Calculator does not
+      currently include imputed income in its automatic
+      tax estimates. Actual taxable wages and payroll
+      deductions may differ.
+    </p>
+
+  </div>
+</details>
 </section>
 </main>
 
